@@ -1,0 +1,22 @@
+{
+  "name": "project-plus",
+  "main": "./lib/project-plus",
+  "version": "0.0.0",
+  "description": "Simply awesome project management in Atom.",
+  "keywords": [
+    "project",
+    "productivity",
+    "settings",
+    "workflow"
+  ],
+  "activationCommands": {
+    "atom-workspace": "project-plus:toggle"
+  },
+  "repository": "https://github.com/mehcode/atom-project-plus",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {
+  }
+}
