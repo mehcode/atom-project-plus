@@ -92,14 +92,14 @@ class ProjectPlusView extends SelectListView
             row.value
 
         rows = _.filter rows, (row) =>
-          row.value.project? and
-          not _.isEqual(row.value.project.paths, atom.project.getPaths())
+          row.project? and
+          not _.isEqual(row.project.paths, atom.project.getPaths())
 
         rows = rows.map (row) =>
           # NOTE: Currently the name of the project
           #       is just set to the first path's basename
-          name: path.basename(row.value.project.paths[0])
-          paths: row.value.project.paths
+          name: path.basename(row.project.paths[0])
+          paths: row.project.paths
 
         # Unique project listing
         @setItems rows
