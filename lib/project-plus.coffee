@@ -1,5 +1,5 @@
-ProjectPlusView = require './project-plus-view'
-{CompositeDisposable} = require 'atom'
+{CompositeDisposable} = require "atom"
+util = require "./util"
 
 module.exports = ProjectPlus =
   projectPlusView: null
@@ -7,14 +7,21 @@ module.exports = ProjectPlus =
   subscriptions: null
 
   activate: (state) ->
-    @projectPlusView = new ProjectPlusView(state.projectPlusViewState)
-    @modalPanel = atom.workspace.addModalPanel(item: @projectPlusView.getElement(), visible: false)
+    # @projectPlusView = new ProjectPlusView(state.projectPlusViewState)
+    # @modalPanel = atom.workspace.addModalPanel(item: @projectPlusView.getElement(), visible: false)
 
-    # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
+    # Events subscribed to in atom's system can be easily cleaned up
+    # with a CompositeDisposable
     @subscriptions = new CompositeDisposable
 
-    # Register command that toggles this view
-    @subscriptions.add atom.commands.add 'atom-workspace', 'project-plus:toggle-project-finder': => @toggle()
+    # Register commands
+    @subscriptions.add atom.commands.add "atom-workspace",
+      "project-plus:open": =>
+        @getProjectFinder().setMode("open").toggle()
+      "project-plus:switch": =>
+        @getProjectFinder().setMode("switch").toggle()
+      "project-plus:remove": =>
+        @getProjectFinder().setMode("remove").toggle()
 
   deactivate: ->
     @modalPanel.destroy()
@@ -22,12 +29,10 @@ module.exports = ProjectPlus =
     @projectPlusView.destroy()
 
   serialize: ->
-    projectPlusViewState: @projectPlusView.serialize()
 
-  toggle: ->
-    console.log 'ProjectPlus was toggled!'
+  getProjectFinder: ->
+    unless @projectFinderView?
+      ProjectFinderView = require "./project-finder-view"
+      @projectFinderView = new ProjectFinderView()
 
-    if @modalPanel.isVisible()
-      @modalPanel.hide()
-    else
-      @modalPanel.show()
+    @projectFinderView

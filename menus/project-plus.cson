@@ -1,7 +1,0 @@
-'context-menu':
-  'atom-text-editor': [
-    {
-      'label': 'Toggle Project Finder'
-      'command': 'project-plus:toggle-project-finder'
-    }
-  ]
