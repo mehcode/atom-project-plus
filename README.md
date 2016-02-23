@@ -25,13 +25,12 @@ apm install project-plus
 ```
 
 ## Commands
-All commands (except `:close`) open up your list of projects to select the target for the action.
+All commands open up your list of projects to select the target for the action.
 
 Command                | Description
 -----------------------|-------------
 `project-plus:switch`  | Switch to project in the same window (correctly)
 `project-plus:open`    | Open project in a new window
-`project-plus:close`   | Close project (as if you opened atom without a directory and without existing state)
 `project-plus:remove`  | Remove project from atom (this does not delete files; it only makes atom forget that you've opened the folder before)
 
 ## Keybindings
