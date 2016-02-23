@@ -84,18 +84,25 @@ class ProjectPlusView extends SelectListView
               resolve(rows)
 
       .then (rows) =>
+        rows = rows.map (row) =>
+          if typeof row.value == "string" and row.isJSON
+            JSON.parse(row.value)
+
+          else
+            row.value
+
         rows = _.filter rows, (row) =>
           row.value.project? and
           not _.isEqual(row.value.project.paths, atom.project.getPaths())
 
-        items = rows.map (row) =>
+        rows = rows.map (row) =>
           # NOTE: Currently the name of the project
           #       is just set to the first path's basename
           name: path.basename(row.value.project.paths[0])
           paths: row.value.project.paths
 
         # Unique project listing
-        @setItems items
+        @setItems rows
 
   confirmed: (item) ->
     @hide()
