@@ -62,47 +62,9 @@ class ProjectPlusView extends SelectListView
 
   # Find all projects using the indexeddb backed state
   populate: ->
-    # TODO: Cache?
-
     @setLoading("Discovering projects\u2026")
-
-    window.atom.stateStore.dbPromise
-      .then (db) =>
-        return new Promise (resolve, reject) =>
-          store = db.transaction(['states']).objectStore('states')
-          request = store.openCursor()
-          rows = []
-
-          request.onerror = (event) => reject(event)
-          request.onsuccess = (event) =>
-            cursor = event.target.result
-            if cursor
-              rows.push cursor.value
-              cursor.continue()
-
-            else
-              resolve(rows)
-
-      .then (rows) =>
-        rows = rows.map (row) =>
-          if typeof row.value == "string" and row.isJSON
-            JSON.parse(row.value)
-
-          else
-            row.value
-
-        rows = _.filter rows, (row) =>
-          row.project? and
-          not _.isEqual(row.project.paths, atom.project.getPaths())
-
-        rows = rows.map (row) =>
-          # NOTE: Currently the name of the project
-          #       is just set to the first path's basename
-          name: path.basename(row.project.paths[0])
-          paths: row.project.paths
-
-        # Unique project listing
-        @setItems rows
+    util.findProjects().then (items) =>
+      @setItems items
 
   confirmed: (item) ->
     @hide()
@@ -127,29 +89,4 @@ class ProjectPlusView extends SelectListView
 
       when "switch"
         # Switch to project in the same window
-
-        # Compute new state key from paths
-        newKey = atom.getStateKey(item.paths)
-
-        # Save the state of the current project
-        util.saveCurrentState().then () =>
-          # Load the state of the new project
-          window.atom.stateStore.load(newKey).then (state) =>
-            atom.deserialize(state)
-
-            # TODO: These are areas where we should submit PRs to
-            #       open functionality for it
-
-            # HACK: Tree view doesn't reload expansion states
-            tvState = state.packageStates["tree-view"]
-            if tvState
-              treeViewPack = atom.packages.getActivePackage("tree-view")
-              tv = treeViewPack?.mainModule?.treeView
-              if tv
-                tv.attach() unless tv.isVisible()
-                tv.updateRoots(tvState.directoryExpansionStates)
-                tv.selectEntry(tv.roots[0])
-                tv.selectEntryForPath(tvState.selectedPath) if tvState.selectedPath
-                tv.focus() if tvState.hasFocus
-                tv.scroller.scrollLeft(tvState.scrollLeft) if tvState.scrollLeft > 0
-                tv.scrollTop(tvState.scrollTop) if tvState.scrollTop > 0
+        util.switchToProject item

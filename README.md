@@ -1,8 +1,3 @@
-# PLEASE NOTE, THIS PACKAGE CURRENTLY DEPENDS ON https://github.com/atom/atom/pull/10605
-## This package should work on atom 1.7.x+
-
----
-
 # Project Plus
 > Simply awesome project management in Atom.
 
