@@ -1,6 +1,8 @@
 # Project Plus
 > Simply awesome project management in Atom.
 
+![](https://raw.githubusercontent.com/mehcode/atom-project-plus/master/project-plus.gif)
+
 You may be thinking.. Yet another project manager (for atom)? Atom contains a
 lot of piping to make project management awesome. It's missing those few bits
 that expose that awesome to users. This is that package.
