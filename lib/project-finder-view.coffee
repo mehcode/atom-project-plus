@@ -13,6 +13,10 @@ class ProjectPlusView extends SelectListView
 
     @addClass("project-finder")
 
+    atom.commands.add @element,
+      'project-finder:open-in-new-window': =>
+        @confirmAndOpenInNewWindow()
+
   destroy: ->
     @cancel()
     @panel?.destroy()
@@ -30,10 +34,6 @@ class ProjectPlusView extends SelectListView
 
   cancelled: ->
     @hide()
-
-  setMode: (mode) ->
-    @mode = mode
-    this
 
   toggle: ->
     if @panel?.isVisible()
@@ -69,24 +69,14 @@ class ProjectPlusView extends SelectListView
   confirmed: (item) ->
     @hide()
 
-    switch @mode
-      when "open"
-        # Open project in new window
-        # TODO: `newWindow: false` means reuse existing window if possible (
-        #         might want a config option here)
-        atom.open(pathsToOpen: item.paths, newWindow: false)
+    # Switch to project in the same window
+    util.switchToProject item
 
-      when "remove"
-        # Remove project from atom's serialized state
+  confirmAndOpenInNewWindow: () ->
+    item = @getSelectedItem()
+    @hide()
 
-        # Compute state key from paths
-        key = atom.getStateKey(item.paths)
-
-        # Remove key from store
-        window.atom.stateStore.dbPromise.then (db) =>
-          store = db.transaction(['states'], "readwrite").objectStore('states')
-          request = store.delete(key)
-
-      when "switch"
-        # Switch to project in the same window
-        util.switchToProject item
+    # Open project in new window
+    # TODO: `newWindow: false` means reuse existing window if possible (
+    #         might want a config option here)
+    atom.open(pathsToOpen: item.paths, newWindow: false)

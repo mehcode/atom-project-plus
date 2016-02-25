@@ -13,23 +13,17 @@ that expose that awesome to users. This is that package.
 
  - Fully supports projects with multiple paths
 
+## Usage
+
+ - `ctrl-alt-p` (linux/windows) or `ctrl-cmd-p` (mac) to open the project finder
+ - `enter` will open the project in the current window
+ - `shift-enter` will open the project in a new window
+
 ## Installation
 
 ```
 apm install project-plus
 ```
-
-## Commands
-All commands open up your list of projects to select the target for the action.
-
-Command                | Description
------------------------|-------------
-`project-plus:switch`  | Switch to project in the same window (correctly)
-`project-plus:open`    | Open project in a new window
-`project-plus:remove`  | Remove project from atom (this does not delete files; it only makes atom forget that you've opened the folder before)
-
-## Keybindings
-There are none (yet). Suggestions are welcome.
 
 ## Contributing
 
