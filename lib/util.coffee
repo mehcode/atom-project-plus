@@ -74,25 +74,26 @@ exports.findProjects = () ->
         .then (rows) ->
           resolve(sanitize(rows))
 
-    # Atom 1.5 to 1.6
-    # Editor state is in a storage folder
-    storageFolder = atom.getStorageFolder().path
+    else
+      # Atom 1.5 to 1.6
+      # Editor state is in a storage folder
+      storageFolder = atom.getStorageFolder().path
 
-    # List the storage folder
-    fs.list storageFolder, (err, filenames) ->
-      # Filter to only have filenames that start with editor-
-      filenames = _.filter filenames, (fn) ->
-        basename = path.basename(fn)
-        /^editor-/.test(basename)
+      # List the storage folder
+      fs.list storageFolder, (err, filenames) ->
+        # Filter to only have filenames that start with editor-
+        filenames = _.filter filenames, (fn) ->
+          basename = path.basename(fn)
+          /^editor-/.test(basename)
 
-      # Read in the JSON data from each state file
-      async.map filenames, ((filename, cb) ->
-        fs.readFile filename, 'utf8', (err, data) ->
-          return cb(err) if (err)
-          cb(null, JSON.parse(data))
-      ), (err, rows) ->
-        return reject(err) if err
-        resolve(sanitize(rows))
+        # Read in the JSON data from each state file
+        async.map filenames, ((filename, cb) ->
+          fs.readFile filename, 'utf8', (err, data) ->
+            return cb(err) if (err)
+            cb(null, JSON.parse(data))
+        ), (err, rows) ->
+          return reject(err) if err
+          resolve(sanitize(rows))
 
 # shim atom.packages.serialize in <= 1.6
 packageStatesSerialize = () ->
@@ -135,7 +136,7 @@ atomDeserialize = (state) ->
 loadState = (key) ->
   if atom.stateStore?
     # Atom 1.7+
-    atom.stateStore.load(newKey)
+    atom.stateStore.load(key)
 
   else
     # Atom <= 1.6
