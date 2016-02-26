@@ -1,5 +1,8 @@
 # Project Plus
-> Simply awesome project management in Atom.
+[![APM Version](https://img.shields.io/apm/v/project-plus.svg)](https://atom.io/packages/project-plus)
+[![APM Downloads](https://img.shields.io/apm/dm/project-plus.svg)](https://atom.io/packages/project-plus)
+
+Simply awesome project management in Atom.
 
 ![](https://raw.githubusercontent.com/mehcode/atom-project-plus/master/project-plus.gif)
 
