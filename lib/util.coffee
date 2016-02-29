@@ -28,32 +28,35 @@ saveCurrentState = () ->
 
 exports.saveCurrentState = saveCurrentState
 
+# prefilter all projects
+sanitize = (rows) ->
+  rows = _.filter rows, (row) ->
+    row.project? and
+    # NOTE: This hides the current project -- not sure if best idea
+    not _.isEqual(row.project.paths, atom.project.getPaths())
+
+  if atom.config.get('project-plus.folderWhitelist').trim().length > 0
+    rows = _.filter rows, (row) ->
+      _.any row.project.paths, (path) ->
+        _.any atom.config.get('project-plus.folderWhitelist').split(','), (whitelistedPath) ->
+          path.indexOf(untildify(whitelistedPath.trim())) > -1
+
+  if atom.config.get('project-plus.folderBlacklist').trim().length > 0
+    rows = _.filter rows, (row) ->
+      _.any row.project.paths, (path) ->
+        _.any atom.config.get('project-plus.folderBlacklist').split(','), (blacklistedPath) ->
+          path.indexOf(untildify(blacklistedPath.trim())) == -1
+
+  rows = rows.map (row) ->
+    # NOTE: Currently the name of the project
+    #       is just set to the first path's basename
+    name: path.basename(row.project.paths[0])
+    paths: row.project.paths
+
+exports.sanitize = sanitize
+
 # Discover all available projects
 exports.findProjects = () ->
-  sanitize = (rows) ->
-    rows = _.filter rows, (row) ->
-      row.project? and
-      # NOTE: This hides the current project -- not sure if best idea
-      not _.isEqual(row.project.paths, atom.project.getPaths())
-
-    if atom.config.get('project-plus.folderWhitelist').trim().length > 0
-      rows = _.filter rows, (row) ->
-        _.any row.project.paths, (path) ->
-          _.any atom.config.get('project-plus.folderWhitelist').split(','), (whitelistedPath) ->
-            path.indexOf(untildify(whitelistedPath.trim())) > -1
-
-    if atom.config.get('project-plus.folderBlacklist').trim().length > 0
-      rows = _.filter rows, (row) ->
-        _.any row.project.paths, (path) ->
-          _.any atom.config.get('project-plus.folderBlacklist').split(','), (blacklistedPath) ->
-            path.indexOf(untildify(blacklistedPath.trim())) == -1
-
-    rows = rows.map (row) ->
-      # NOTE: Currently the name of the project
-      #       is just set to the first path's basename
-      name: path.basename(row.project.paths[0])
-      paths: row.project.paths
-
   return new Promise (resolve) ->
     if atom.stateStore?
       # Atom 1.7+
