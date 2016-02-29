@@ -6,6 +6,18 @@ module.exports = ProjectPlus =
   modalPanel: null
   subscriptions: null
 
+  config:
+    folderWhitelist:
+      type: 'string'
+      default: ''
+      title: 'Folder Whitelist'
+      description: 'you can specify list of whitelisted folders, separated by comma. e.g ~/Projects/Work, ~/Projects/hobby'
+    folderBlacklist:
+      type: 'string'
+      default: ''
+      title: 'Folder Blacklist'
+      description: 'you can specify list of blacklisted folders, separated by comma. e.g ~/Projects/Work/secret, ~/Projects/hob by/new'
+
   activate: (state) ->
     # Events subscribed to in atom's system can be easily cleaned up
     # with a CompositeDisposable

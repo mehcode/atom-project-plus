@@ -2,6 +2,7 @@
 _ = require 'underscore-plus'
 fs = require 'fs-plus'
 path = require 'path'
+untildify = require 'untildify'
 async = require 'async'
 
 saveCurrentState = () ->
@@ -34,6 +35,18 @@ exports.findProjects = () ->
       row.project? and
       # NOTE: This hides the current project -- not sure if best idea
       not _.isEqual(row.project.paths, atom.project.getPaths())
+
+    if atom.config.get('project-plus.folderWhitelist').trim().length > 0
+      rows = _.filter rows, (row) ->
+        _.any row.project.paths, (path) ->
+          _.any atom.config.get('project-plus.folderWhitelist').split(','), (whitelistedPath) ->
+            path.indexOf(untildify(whitelistedPath.trim())) > -1
+
+    if atom.config.get('project-plus.folderBlacklist').trim().length > 0
+      rows = _.filter rows, (row) ->
+        _.any row.project.paths, (path) ->
+          _.any atom.config.get('project-plus.folderBlacklist').split(','), (blacklistedPath) ->
+            path.indexOf(untildify(blacklistedPath.trim())) == -1
 
     rows = rows.map (row) ->
       # NOTE: Currently the name of the project
