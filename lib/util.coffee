@@ -31,7 +31,13 @@ exports.saveCurrentState = saveCurrentState
 exports.findProjects = () ->
   sanitize = (rows) ->
     rows = _.filter rows, (row) ->
-      row.project? and row.project.paths? and
+      # Is `.project` non-null
+      row.project? and
+      # Is `.project.paths` non-null
+      row.project.paths? and
+      # Does `.project.paths` contain an array (only) of strings
+      # NOTE: This one is weird -- how could the state get so corrupted?
+      _.all(row.project.paths.map((pn) -> (pn || "").length > 0)) and
       # NOTE: This hides the current project -- not sure if best idea
       not _.isEqual(row.project.paths, atom.project.getPaths())
 
