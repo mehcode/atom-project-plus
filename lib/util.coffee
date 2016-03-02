@@ -31,7 +31,7 @@ exports.saveCurrentState = saveCurrentState
 exports.findProjects = () ->
   sanitize = (rows) ->
     rows = _.filter rows, (row) ->
-      row.project? and
+      row.project? and row.project.paths? and
       # NOTE: This hides the current project -- not sure if best idea
       not _.isEqual(row.project.paths, atom.project.getPaths())
 
