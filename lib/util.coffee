@@ -2,6 +2,7 @@
 _ = require 'underscore-plus'
 fs = require 'fs-plus'
 path = require 'path'
+untildify = require 'untildify'
 async = require 'async'
 
 saveCurrentState = () ->
@@ -27,9 +28,20 @@ saveCurrentState = () ->
 
 exports.saveCurrentState = saveCurrentState
 
-# Discover all available projects
-exports.findProjects = () ->
-  sanitize = (rows) ->
+# prefilter all projects
+sanitize = (rows) ->
+  rows = _.filter rows, (row) ->
+    row.project? and
+    # NOTE: This hides the current project -- not sure if best idea
+    not _.isEqual(row.project.paths, atom.project.getPaths())
+
+  if atom.config.get('project-plus.folderWhitelist').trim().length > 0
+    rows = _.filter rows, (row) ->
+      _.any row.project.paths, (path) ->
+        _.any atom.config.get('project-plus.folderWhitelist').split(','), (whitelistedPath) ->
+          path.indexOf(untildify(whitelistedPath.trim())) > -1
+
+  if atom.config.get('project-plus.folderBlacklist').trim().length > 0
     rows = _.filter rows, (row) ->
       # Is `.project` non-null
       row.project? and
@@ -41,12 +53,10 @@ exports.findProjects = () ->
       # NOTE: This hides the current project -- not sure if best idea
       not _.isEqual(row.project.paths, atom.project.getPaths())
 
-    rows = rows.map (row) ->
-      # NOTE: Currently the name of the project
-      #       is just set to the first path's basename
-      name: path.basename(row.project.paths[0])
-      paths: row.project.paths
+exports.sanitize = sanitize
 
+# Discover all available projects
+exports.findProjects = () ->
   return new Promise (resolve) ->
     if atom.stateStore?
       # Atom 1.7+
