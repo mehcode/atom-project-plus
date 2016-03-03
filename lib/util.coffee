@@ -2,7 +2,8 @@
 _ = require 'underscore-plus'
 fs = require 'fs-plus'
 path = require 'path'
-untildify = require 'untildify'
+{within} = require 'node-path-extras'
+expandPath = require 'path-expand'
 async = require 'async'
 
 saveCurrentState = () ->
@@ -28,20 +29,31 @@ saveCurrentState = () ->
 
 exports.saveCurrentState = saveCurrentState
 
-# prefilter all projects
-sanitize = (rows) ->
-  rows = _.filter rows, (row) ->
-    row.project? and
-    # NOTE: This hides the current project -- not sure if best idea
-    not _.isEqual(row.project.paths, atom.project.getPaths())
+# Expand whitelist and blacklist
+expandConfig = () ->
+  return new Promise (resolve, reject) ->
+    async.map [
+      atom.config.get('project-plus.folderWhitelist'),
+      atom.config.get('project-plus.folderBlacklist'),
+    ], ((text, done) ->
+      if (text || "").trim().length > 0
+        async.map text.split(","), ((pathname, innerDone) ->
+          expandPath(pathname)
+            .then ((expanded) -> innerDone(null, expanded))
+            .catch innerDone
+        ), (err, result) ->
+          return reject(err) if err
+          done(null, result)
 
-  if atom.config.get('project-plus.folderWhitelist').trim().length > 0
-    rows = _.filter rows, (row) ->
-      _.any row.project.paths, (path) ->
-        _.any atom.config.get('project-plus.folderWhitelist').split(','), (whitelistedPath) ->
-          path.indexOf(untildify(whitelistedPath.trim())) > -1
+      else
+        done(null, [])
+    ), (err, result) ->
+      return reject(err) if err
+      resolve(result)
 
-  if atom.config.get('project-plus.folderBlacklist').trim().length > 0
+# Filter all projects
+filterProjects = (rows) ->
+  return new Promise (resolve, reject) ->
     rows = _.filter rows, (row) ->
       # Is `.project` non-null
       row.project? and
@@ -53,7 +65,35 @@ sanitize = (rows) ->
       # NOTE: This hides the current project -- not sure if best idea
       not _.isEqual(row.project.paths, atom.project.getPaths())
 
-exports.sanitize = sanitize
+    rows = rows.map (row) ->
+      # NOTE: Currently the name of the project
+      #       is just set to the first path's basename
+      name: path.basename(row.project.paths[0])
+      paths: row.project.paths
+
+    # Resolve whitelist and blacklist
+    expandConfig().then (([whitelist, blacklist]) ->
+      # Filter according to whitelist
+      if whitelist.length > 0
+        rows = _.filter rows, (row) ->
+          _.any row.paths, (pathname) ->
+            _.any whitelist, (whitelistedPath) ->
+              pathname == whitelistedPath or
+              within pathname, whitelistedPath
+
+      # Filter according to blacklist
+      if blacklist.length > 0
+        rows = _.reject rows, (row) ->
+          _.any row.paths, (pathname) ->
+            _.any blacklist, (blacklistedPath) ->
+              pathname == blacklistedPath or
+              within pathname, blacklistedPath
+
+      # Resolve
+      resolve(rows)
+    ), reject
+
+exports.filterProjects = filterProjects
 
 # Discover all available projects
 exports.findProjects = () ->
@@ -88,7 +128,10 @@ exports.findProjects = () ->
                 dbResolve(rows)
 
         .then (rows) ->
-          resolve(sanitize(rows))
+          return filterProjects(rows)
+
+        .then (projects) ->
+          resolve(projects)
 
     else
       # Atom 1.5 to 1.6
@@ -109,7 +152,7 @@ exports.findProjects = () ->
             cb(null, JSON.parse(data))
         ), (err, rows) ->
           return reject(err) if err
-          resolve(sanitize(rows))
+          filterProjects(rows).then(resolve).catch(reject)
 
 # shim atom.packages.serialize in <= 1.6
 packageStatesSerialize = () ->
