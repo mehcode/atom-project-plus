@@ -1,3 +1,11 @@
+## 0.6.0
+
+* Sort projects by most-recently-used (MRU)
+
+## 0.5.0
+
+* Add folder whitelist and blacklist configuration options [@shemerey](https://github.com/shemerey)
+
 ## 0.4.0
 
 * Unify switch and open commands
