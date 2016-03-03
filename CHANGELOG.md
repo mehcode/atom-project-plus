@@ -4,7 +4,7 @@
 
 ## 0.5.0
 
-* Add folder whitelist and blacklist configuration options [@shemerey](https://github.com/shemerey)
+* Add folder whitelist and blacklist configuration options — [@shemerey](https://github.com/shemerey)
 
 ## 0.4.0
 
