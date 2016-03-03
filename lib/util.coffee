@@ -97,7 +97,7 @@ exports.filterProjects = filterProjects
 
 # Discover all available projects
 exports.findProjects = () ->
-  return new Promise (resolve) ->
+  return new Promise (resolve, reject) ->
     if atom.stateStore?
       # Atom 1.7+
       # We have state serialized to IndexedDB
@@ -128,10 +128,7 @@ exports.findProjects = () ->
                 dbResolve(rows)
 
         .then (rows) ->
-          return filterProjects(rows)
-
-        .then (projects) ->
-          resolve(projects)
+          filterProjects(rows).then(resolve).catch(reject)
 
     else
       # Atom 1.5 to 1.6
