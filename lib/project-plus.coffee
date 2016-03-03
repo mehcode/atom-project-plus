@@ -7,16 +7,16 @@ module.exports = ProjectPlus =
   subscriptions: null
 
   config:
-    folderWhitelist:
-      type: 'string'
-      default: ''
-      title: 'Folder Whitelist'
-      description: 'you can specify list of whitelisted folders, separated by comma. e.g ~/Projects/Work, ~/Projects/hobby'
     folderBlacklist:
       type: 'string'
       default: ''
       title: 'Folder Blacklist'
-      description: 'you can specify list of blacklisted folders, separated by comma. e.g ~/Projects/Work/secret, ~/Projects/hob by/new'
+      description: 'Projects will never be shown for paths matching this list (including subpaths), eg `$HOME/Documents` to exclude a single folder and all its children.'
+    folderWhitelist:
+      type: 'string'
+      default: ''
+      title: 'Folder Whitelist'
+      description: 'Projects will only be shown for paths matching this list (including subpaths), eg `$HOME/Workspace` to limit to a single folder and all its children.'
 
   activate: (state) ->
     # Events subscribed to in atom's system can be easily cleaned up
