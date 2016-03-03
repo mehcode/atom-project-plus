@@ -57,8 +57,8 @@ filterProjects = (rows) ->
     rows = _.filter rows, (row) ->
       # Is `.project` non-null
       row.project? and
-      # Is `.project.paths` non-null
-      row.project.paths? and
+      # Is `.project.paths` non-empty
+      (row.project.paths || []).length > 0 and
       # Does `.project.paths` contain an array (only) of strings
       # NOTE: This one is weird -- how could the state get so corrupted?
       _.all(row.project.paths.map((pn) -> (pn || "").length > 0)) and
