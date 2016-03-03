@@ -70,6 +70,7 @@ filterProjects = (rows) ->
       #       is just set to the first path's basename
       name: path.basename(row.project.paths[0])
       paths: row.project.paths
+      timestamp: row.updatedAt
 
     # Resolve whitelist and blacklist
     expandConfig().then (([whitelist, blacklist]) ->
@@ -119,11 +120,14 @@ exports.findProjects = () ->
 
               else
                 rows = rows.map (row) ->
-                  if typeof row.value == "string" and row.isJSON
+                  result = if typeof row.value == "string" and row.isJSON
                     JSON.parse(row.value)
 
                   else
                     row.value
+
+                  result.updatedAt = new Date(Date.parse(row.storedAt))
+                  result
 
                 dbResolve(rows)
 
@@ -144,9 +148,18 @@ exports.findProjects = () ->
 
         # Read in the JSON data from each state file
         async.map filenames, ((filename, cb) ->
-          fs.readFile filename, 'utf8', (err, data) ->
+          fs.stat filename, (err, stats) ->
             return cb(err) if (err)
-            cb(null, JSON.parse(data))
+
+            updatedAt = new Date(Date.parse(stats.mtime))
+
+            fs.readFile filename, 'utf8', (err, data) ->
+              return cb(err) if (err)
+
+              row = JSON.parse(data)
+              row.updatedAt = updatedAt
+              cb(null, row)
+
         ), (err, rows) ->
           return reject(err) if err
           filterProjects(rows).then(resolve).catch(reject)
