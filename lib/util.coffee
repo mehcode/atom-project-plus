@@ -117,7 +117,7 @@ exports.findProjects = () ->
                 dbResolve(rows)
 
         .then (rows) ->
-          filterProjects(rows).then(resolve).catch(reject)
+          resolve(filterProjects(rows))
 
     else
       # Atom 1.5 to 1.6
@@ -147,7 +147,7 @@ exports.findProjects = () ->
 
         ), (err, rows) ->
           return reject(err) if err
-          filterProjects(rows).then(resolve).catch(reject)
+          resolve(filterProjects(rows))
 
 # shim atom.packages.serialize in <= 1.6
 packageStatesSerialize = () ->
