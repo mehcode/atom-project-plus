@@ -19,7 +19,7 @@
     "atom-space-pen-views": "^2.2.0",
     "fs-plus": "^2.8.1",
     "minimatch": "^3.0.0",
-    "path-expand": "^0.1.0",
-    "underscore-plus": "^1.6.6"
+    "underscore-plus": "^1.6.6",
+    "untildify": "^2.1.0"
   }
 }

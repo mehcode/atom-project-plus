@@ -31,53 +31,53 @@ exports.saveCurrentState = saveCurrentState
 
 # Expand whitelist and blacklist
 expandConfig = () ->
-  Promise.all(
-    atom.config.get('project-plus.folderWhitelist').split(',').map (white) -> (untildify(white.trim()))
-  ).then( (whiteList) ->
-    [whiteList, atom.config.get('project-plus.folderBlacklist').split(',').map (black) -> black.trim()]
-  )
+  whitelist = atom.config.get('project-plus.folderWhitelist')
+    .split(',').map (pattern) -> untildify(pattern.trim())
 
+  blacklist = atom.config.get('project-plus.folderBlacklist')
+    .split(',').map (pattern) -> untildify(pattern.trim())
+
+  [whitelist, blacklist]
 
 # Filter all projects
 filterProjects = (rows) ->
-  return new Promise (resolve, reject) ->
+  rows = _.filter rows, (row) ->
+    # Is `.project` non-null
+    row.project? and
+    # Is `.project.paths` non-empty
+    (row.project.paths || []).length > 0 and
+    # Does `.project.paths` contain an array (only) of strings
+    # NOTE: This one is weird -- how could the state get so corrupted?
+    _.all(row.project.paths.map((pn) -> (pn || "").length > 0)) and
+    # NOTE: This hides the current project -- not sure if best idea
+    not _.isEqual(row.project.paths, atom.project.getPaths())
+
+  rows = rows.map (row) ->
+    # NOTE: Currently the name of the project
+    #       is just set to the first path's basename
+    name: path.basename(row.project.paths[0])
+    paths: row.project.paths
+    timestamp: row.updatedAt
+
+  # Resolve whitelist and blacklist
+  [whitelist, blacklist] = expandConfig()
+
+  # Filter according to whitelist
+  if whitelist.length > 0
     rows = _.filter rows, (row) ->
-      # Is `.project` non-null
-      row.project? and
-      # Is `.project.paths` non-empty
-      (row.project.paths || []).length > 0 and
-      # Does `.project.paths` contain an array (only) of strings
-      # NOTE: This one is weird -- how could the state get so corrupted?
-      _.all(row.project.paths.map((pn) -> (pn || "").length > 0)) and
-      # NOTE: This hides the current project -- not sure if best idea
-      not _.isEqual(row.project.paths, atom.project.getPaths())
+      glob = "{#{whitelist.join(',')},#{whitelist.join('/**,')}/**,}"
+      row.paths.filter(
+        minimatch.filter(glob,  {matchBase: true, dot: true})
+      ).length > 0
 
-    rows = rows.map (row) ->
-      # NOTE: Currently the name of the project
-      #       is just set to the first path's basename
-      name: path.basename(row.project.paths[0])
-      paths: row.project.paths
-      timestamp: row.updatedAt
+  if blacklist.length > 0
+    rows = _.filter rows, (row) ->
+      glob = "{#{blacklist.join(',')},}"
+      row.paths.filter(
+        minimatch.filter(glob,  {matchBase: true, dot: true})
+      ).length == 0
 
-    # Resolve whitelist and blacklist
-    expandConfig().then (([whitelist, blacklist]) ->
-      # Filter according to whitelist
-      if whitelist.length > 0
-        rows = _.filter rows, (row) ->
-          glob = "{#{whitelist.join(',')},#{whitelist.join('/**,')}/**,}"
-          row.paths.filter(
-            minimatch.filter(glob,  {matchBase: true, dot: true})
-          ).length > 0
-
-      if blacklist.length > 0
-        rows = _.filter rows, (row) ->
-          glob = "{#{blacklist.join(',')},}"
-          row.paths.filter(
-            minimatch.filter(glob,  {matchBase: true, dot: true})
-          ).length == 0
-      # Resolve
-      resolve(rows)
-    ), reject
+  rows
 
 exports.filterProjects = filterProjects
 
