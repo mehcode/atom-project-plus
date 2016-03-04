@@ -2,8 +2,8 @@
 _ = require 'underscore-plus'
 fs = require 'fs-plus'
 path = require 'path'
-{within} = require 'node-path-extras'
-expandPath = require 'path-expand'
+minimatch = require 'minimatch'
+untildify = require 'untildify'
 async = require 'async'
 
 saveCurrentState = () ->
@@ -31,25 +31,12 @@ exports.saveCurrentState = saveCurrentState
 
 # Expand whitelist and blacklist
 expandConfig = () ->
-  return new Promise (resolve, reject) ->
-    async.map [
-      atom.config.get('project-plus.folderWhitelist'),
-      atom.config.get('project-plus.folderBlacklist'),
-    ], ((text, done) ->
-      if (text || "").trim().length > 0
-        async.map text.split(","), ((pathname, innerDone) ->
-          expandPath(pathname)
-            .then ((expanded) -> innerDone(null, expanded))
-            .catch innerDone
-        ), (err, result) ->
-          return reject(err) if err
-          done(null, result)
+  Promise.all(
+    atom.config.get('project-plus.folderWhitelist').split(',').map (white) -> (untildify(white.trim()))
+  ).then( (whiteList) ->
+    [whiteList, atom.config.get('project-plus.folderBlacklist').split(',').map (black) -> black.trim()]
+  )
 
-      else
-        done(null, [])
-    ), (err, result) ->
-      return reject(err) if err
-      resolve(result)
 
 # Filter all projects
 filterProjects = (rows) ->
@@ -77,19 +64,17 @@ filterProjects = (rows) ->
       # Filter according to whitelist
       if whitelist.length > 0
         rows = _.filter rows, (row) ->
-          _.any row.paths, (pathname) ->
-            _.any whitelist, (whitelistedPath) ->
-              pathname == whitelistedPath or
-              within pathname, whitelistedPath
+          glob = "{#{whitelist.join(',')},#{whitelist.join('/**,')}/**,}"
+          row.paths.filter(
+            minimatch.filter(glob,  {matchBase: true, dot: true})
+          ).length > 0
 
-      # Filter according to blacklist
       if blacklist.length > 0
-        rows = _.reject rows, (row) ->
-          _.any row.paths, (pathname) ->
-            _.any blacklist, (blacklistedPath) ->
-              pathname == blacklistedPath or
-              within pathname, blacklistedPath
-
+        rows = _.filter rows, (row) ->
+          glob = "{#{blacklist.join(',')},}"
+          row.paths.filter(
+            minimatch.filter(glob,  {matchBase: true, dot: true})
+          ).length == 0
       # Resolve
       resolve(rows)
     ), reject

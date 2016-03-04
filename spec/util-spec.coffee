@@ -11,6 +11,7 @@ describe "filterProjects", ->
     { project: { name: 7, paths: ['/some/folder/here'] } },
     { project: { name: 8, paths: ['/Workspace/b', '/Workspace/c'] } },
     { project: { name: 9, paths: ['/Workspace.bak/a'] } },
+    { project: { name: 10, paths: ['/Workspace.bak/.git/secret'] } },
   ]
 
   beforeEach ->
@@ -21,39 +22,44 @@ describe "filterProjects", ->
     atom.config.set('project-plus.folderWhitelist', '')
     atom.config.set('project-plus.folderBlacklist', '')
 
-  it "should return no projects when none match the whitelist", (done) ->
-    atom.config.set('project-plus.folderWhitelist', 'exclude_all')
-    util.filterProjects(rows).then (result) ->
-      expect(result).toEqual([])
+  it "should return no projects when none match the whitelist", ->
+    waitsForPromise ->
+      atom.config.set('project-plus.folderWhitelist', 'exclude_all')
+      util.filterProjects(rows).then (result) ->
+        expect(result).toEqual([])
 
-      done()
+  it "should inlude only projects that match the whitelist", ->
+    waitsForPromise ->
+      atom.config.set('project-plus.folderWhitelist', '/some/folder/here')
+      util.filterProjects(rows).then (result) ->
+        expect(result.length).toEqual(1)
 
-  it "should inlude only projects that match the whitelist", (done) ->
-    atom.config.set('project-plus.folderWhitelist', '/some/folder/here')
-    util.filterProjects(rows).then (result) ->
-      expect(result.length).toEqual(1)
-      expect(result[0].name).toEqual('here')
-
-      done()
-
-  it "should include projects that are within a whitelisted folder", (done) ->
-    atom.config.set('project-plus.folderWhitelist', '/Projects')
-    util.filterProjects(rows).then (result) ->
-      expect(result.length).toEqual(4)
+  it "should include projects that are within a whitelisted folder", ->
+    waitsForPromise ->
+      atom.config.set('project-plus.folderWhitelist', '/Projects')
+      util.filterProjects(rows).then (result) ->
+        expect(result.length).toEqual(4)
 
       atom.config.set('project-plus.folderWhitelist', '/Workspace')
       util.filterProjects(rows).then (result) ->
         expect(result.length).toEqual(1)
 
-        done()
-
-  it "should not include projects that match the blacklist", (done) ->
-    atom.config.set('project-plus.folderBlacklist', '/some/folder/here')
-    util.filterProjects(rows).then (result) ->
-      expect(result.length).toEqual(9)
-
+  it "should not include projects that match the blacklist", ->
+    waitsForPromise ->
+      atom.config.set('project-plus.folderBlacklist', '/some/folder/here')
       util.filterProjects(rows).then (result) ->
-        atom.config.set('project-plus.folderBlacklist', 'here')
-        expect(result.length).toEqual(9)
+        expect(result.length).toEqual(rows.length - 1)
 
-        done()
+      atom.config.set('project-plus.folderBlacklist', 'here')
+      util.filterProjects(rows).then (result) ->
+        expect(result.length).toEqual(rows.length - 1)
+
+  it "should not include projects that match glob pattern in blacklist", ->
+    waitsForPromise ->
+      atom.config.set('project-plus.folderBlacklist', '/**/.git/**')
+      util.filterProjects(rows).then (result) ->
+        expect(result.length).toEqual(rows.length - 1)
+
+      atom.config.set('project-plus.folderBlacklist', '/Workspace.bak/.git/**')
+      util.filterProjects(rows).then (result) ->
+        expect(result.length).toEqual(rows.length - 1)
