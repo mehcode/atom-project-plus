@@ -51,6 +51,14 @@ expandConfig = () ->
       return reject(err) if err
       resolve(result)
 
+# Sort projects
+exports.sortProjects = (items) ->
+  items = items.sort (a, b) ->
+    a.timestamp.getTime() - b.timestamp.getTime()
+
+  items = items.reverse()
+  items
+
 # Filter all projects
 filterProjects = (rows) ->
   return new Promise (resolve, reject) ->

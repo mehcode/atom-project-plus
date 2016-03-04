@@ -28,6 +28,18 @@ module.exports = ProjectPlus =
       "project-plus:toggle-project-finder": =>
         @getProjectFinder().toggle()
 
+      "project-plus:open-next-recently-used-project": ->
+        util.findProjects().then (items) ->
+          if items.length > 0
+            items = util.sortProjects(items)
+            util.switchToProject items[0]
+
+      "project-plus:open-previous-recently-used-project": ->
+        util.findProjects().then (items) ->
+          if items.length > 0
+            items = util.sortProjects(items)
+            util.switchToProject items[items.length - 1]
+
   deactivate: ->
     @modalPanel.destroy()
     @subscriptions.dispose()

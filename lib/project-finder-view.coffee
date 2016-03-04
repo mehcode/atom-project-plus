@@ -64,11 +64,7 @@ class ProjectPlusView extends SelectListView
   populate: ->
     @setLoading("Discovering projects\u2026")
     util.findProjects().then (items) =>
-      items = items.sort (a, b) ->
-        a.timestamp.getTime() - b.timestamp.getTime()
-
-      items = items.reverse()
-
+      items = util.sortProjects(items)
       @setItems items
 
   confirmed: (item) ->
