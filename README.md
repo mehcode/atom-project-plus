@@ -18,17 +18,45 @@ that expose that awesome to users. This is that package.
 
  - Fully supports projects with multiple paths
 
-## Usage
-
- - `ctrl-alt-p` (linux/windows) or `ctrl-cmd-p` (mac) to open the project finder
- - `enter` will open the project in the current window
- - `shift-enter` will open the project in a new window
-
 ## Installation
 
 ```
 apm install project-plus
 ```
+
+## Usage
+
+#### Project Finder
+
+ - `ctrl-alt-p` (linux/windows) or `ctrl-cmd-p` (mac) to open the project finder
+ - `enter` will open the project in the current window
+ - `shift-enter` will open the project in a new window
+
+#### Project Tab
+
+ - `ctrl-cmd-tab` will switch to the next recently used project
+ - `ctrl-shift-cmd-tab` will switch to the previous recently used project
+
+## Commands
+
+#### Project Plus: Open
+
+Switch to a project (in the current atom window) by selecting one or more
+folders using an OS folder picker.
+
+#### Project Plus: Close
+
+Close the current project and revert to an empty atom window.
+
+## Configuration
+
+#### Whitelist / Blacklist
+
+Specify a folder or glob pattern to designate which projects will be matched.
+
+#### Show Project Path
+
+Disable to hide the project paths on the project finder.
 
 ## Contributing
 
