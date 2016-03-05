@@ -32,6 +32,14 @@ module.exports = ProjectPlus =
 
     # Register commands
     @subscriptions.add atom.commands.add "atom-workspace",
+      "project-plus:open": =>
+        atom.pickFolder (selectedPaths = []) =>
+          if selectedPaths
+            util.switchToProject({paths: selectedPaths})
+
+      "project-plus:close": =>
+        util.closeProject()
+
       "project-plus:toggle-project-finder": =>
         @getProjectFinder().toggle()
 

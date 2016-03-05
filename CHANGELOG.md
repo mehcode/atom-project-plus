@@ -8,6 +8,8 @@
 * :bug: Fix #20; remove attach line for tree-view
 * Add `showPath` config; allow paths to be toggled from the finder
 * :sparkles: Improve visual display of multi-path projects (ref #8)
+* :hammer: Close #5; add ability to switch to a project from a folder picker
+* :hammer: Add ability to close the current project and get an empty atom window
 
 ## 0.6.0
 

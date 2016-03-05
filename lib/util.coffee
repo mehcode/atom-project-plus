@@ -214,6 +214,9 @@ loadState = (key) ->
 
 exports.switchToProject = (item) ->
   new Promise (resolve) ->
+    # Get current state key
+    currentKey = atom.getStateKey(atom.project.getPaths())
+
     # Compute new state key from paths
     newKey = atom.getStateKey(item.paths)
 
@@ -227,24 +230,33 @@ exports.switchToProject = (item) ->
 
       # Load the state of the new project
       loadState(newKey).then (state) ->
-        atomDeserialize(state)
+        if state
+          atomDeserialize(state)
 
-        # HACK: Tree view doesn't reload expansion states
-        tvState = state.packageStates["tree-view"]
-        if tvState
-          treeViewPack = atom.packages.getActivePackage("tree-view")
-          tv = treeViewPack?.mainModule?.treeView
-          if tv
-            tv.updateRoots(tvState.directoryExpansionStates)
-            tv.selectEntry(tv.roots[0])
-            tv.selectEntryForPath(tvState.selectedPath) if tvState.selectedPath
-            tv.focus() if tvState.hasFocus
-            tv.scroller.scrollLeft(tvState.scrollLeft) if tvState.scrollLeft > 0
-            tv.scrollTop(tvState.scrollTop) if tvState.scrollTop > 0
+          # HACK: Tree view doesn't reload expansion states
+          tvState = state.packageStates["tree-view"]
+          if tvState
+            treeViewPack = atom.packages.getActivePackage("tree-view")
+            tv = treeViewPack?.mainModule?.treeView
+            if tv
+              # NOTE: Re-attach the tree-view if this is an empty atom
+              tv.attach() if not currentKey and not tv.isVisible()
+              tv.updateRoots(tvState.directoryExpansionStates)
+              tv.selectEntry(tv.roots[0])
+              tv.selectEntryForPath(tvState.selectedPath) if tvState.selectedPath
+              tv.focus() if tvState.hasFocus
+              tv.scroller.scrollLeft(tvState.scrollLeft) if tvState.scrollLeft > 0
+              tv.scrollTop(tvState.scrollTop) if tvState.scrollTop > 0
 
-        # HACK: Re-focus editor (if tree-view didn't have focus)
-        unless tvState.hasFocus
-          atom.workspace.getActivePane().activate()
+              # HACK: Re-focus editor (if tree-view didn't have focus)
+              unless tvState.hasFocus
+                atom.workspace.getActivePane().activate()
+        else
+          # Close all buffers
+          buffer?.destroy() for buffer in atom.project.buffers
+
+          # Set project paths
+          atom.project.setPaths(item.paths)
 
         # HACK[Pigments]: Pigments needs to reload on project reload
         pigments = atom.packages.getActivePackage("pigments")
@@ -253,3 +265,18 @@ exports.switchToProject = (item) ->
 
         # Done
         resolve()
+
+exports.closeProject = () ->
+  # Save the state of the current project
+  saveCurrentState().then () ->
+    # Close all buffers
+    buffer?.destroy() for buffer in atom.project.getBuffers()
+
+    # Set project paths
+    atom.project.setPaths([])
+
+    # TODO: Should we close the tree-view?
+    treeViewPack = atom.packages.getActivePackage("tree-view")
+    tv = treeViewPack?.mainModule?.treeView
+    if tv
+      tv.detach() if tv.isVisible()
