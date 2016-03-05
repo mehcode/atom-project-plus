@@ -4,6 +4,8 @@
 * Fix memory leak by tabs package (was recreating subscriptions on each deserialization)
 * Support glob patterns in folder whitelist/blacklist — [@shemerey](https://github.com/shemerey)
 * Fix folder match (for sub-folders) in whitelist/blacklist — [@shemerey](https://github.com/shemerey)
+* :bug: Fix #19; reload pigments on project switch
+* :bug: Fix #20; remove attach line for tree-view
 
 ## 0.6.0
 
