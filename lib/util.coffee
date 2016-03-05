@@ -66,11 +66,14 @@ filterProjects = (rows, options={}) ->
       row.project.paths, atom.project.getPaths())
 
   rows = rows.map (row) ->
-    # NOTE: Currently the name of the project
-    #       is just set to the first path's basename
-    name: path.basename(row.project.paths[0])
-    paths: row.project.paths
-    timestamp: row.updatedAt
+    # NOTE: Will be adding a way to _set_ a project name
+    name = (row.project.paths.map((pn) -> path.basename(pn))).join(",\u00a0")
+
+    {
+      name: name
+      paths: row.project.paths
+      timestamp: row.updatedAt
+    }
 
   # Resolve whitelist and blacklist
   [whitelist, blacklist] = expandConfig()

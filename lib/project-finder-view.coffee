@@ -3,6 +3,7 @@ path = require "path"
 url = require "url"
 {$, $$, SelectListView} = require "atom-space-pen-views"
 util = require "./util"
+tildify = require "tildify"
 
 module.exports =
 class ProjectPlusView extends SelectListView
@@ -52,13 +53,21 @@ class ProjectPlusView extends SelectListView
       super
 
   viewForItem: (item) ->
-    $$ ->
-      @li class: 'two-lines', =>
-        @div class: "primary-line", =>
-          @text item.name
+    showPath = atom.config.get('project-plus.showPath')
 
-        @div class: "secondary-line", =>
-          @text item.paths[0]
+    $$ ->
+      if showPath
+        @li class: 'two-lines', =>
+          @div class: "primary-line", =>
+            @text item.name
+
+          for pathname in item.paths
+            @div class: "secondary-line", =>
+              @text tildify(pathname)
+      else
+        @li class: 'one-line', =>
+          @div class: "primary-line", =>
+            @text item.name
 
   # Find all projects using the indexeddb backed state
   populate: ->

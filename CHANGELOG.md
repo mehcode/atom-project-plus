@@ -6,6 +6,8 @@
 * Fix folder match (for sub-folders) in whitelist/blacklist — [@shemerey](https://github.com/shemerey)
 * :bug: Fix #19; reload pigments on project switch
 * :bug: Fix #20; remove attach line for tree-view
+* Add `showPath` config; allow paths to be toggled from the finder
+* :sparkles: Improve visual display of multi-path projects (ref #8)
 
 ## 0.6.0
 
