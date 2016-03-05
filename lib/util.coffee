@@ -232,7 +232,6 @@ exports.switchToProject = (item) ->
           treeViewPack = atom.packages.getActivePackage("tree-view")
           tv = treeViewPack?.mainModule?.treeView
           if tv
-            tv.attach() unless tv.isVisible()
             tv.updateRoots(tvState.directoryExpansionStates)
             tv.selectEntry(tv.roots[0])
             tv.selectEntryForPath(tvState.selectedPath) if tvState.selectedPath
