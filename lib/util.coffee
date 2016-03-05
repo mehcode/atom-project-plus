@@ -244,5 +244,10 @@ exports.switchToProject = (item) ->
         unless tvState.hasFocus
           atom.workspace.getActivePane().activate()
 
+        # HACK[Pigments]: Pigments needs to reload on project reload
+        pigments = atom.packages.getActivePackage("pigments")
+        if pigments
+          pigments.mainModule.reloadProjectVariables()
+
         # Done
         resolve()
