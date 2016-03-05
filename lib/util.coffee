@@ -2,8 +2,8 @@
 _ = require 'underscore-plus'
 fs = require 'fs-plus'
 path = require 'path'
-{within} = require 'node-path-extras'
-expandPath = require 'path-expand'
+minimatch = require 'minimatch'
+untildify = require 'untildify'
 async = require 'async'
 
 saveCurrentState = () ->
@@ -31,25 +31,13 @@ exports.saveCurrentState = saveCurrentState
 
 # Expand whitelist and blacklist
 expandConfig = () ->
-  return new Promise (resolve, reject) ->
-    async.map [
-      atom.config.get('project-plus.folderWhitelist'),
-      atom.config.get('project-plus.folderBlacklist'),
-    ], ((text, done) ->
-      if (text || "").trim().length > 0
-        async.map text.split(","), ((pathname, innerDone) ->
-          expandPath(pathname)
-            .then ((expanded) -> innerDone(null, expanded))
-            .catch innerDone
-        ), (err, result) ->
-          return reject(err) if err
-          done(null, result)
+  whitelist = atom.config.get('project-plus.folderWhitelist')
+    .split(',').map (pattern) -> untildify(pattern.trim())
 
-      else
-        done(null, [])
-    ), (err, result) ->
-      return reject(err) if err
-      resolve(result)
+  blacklist = atom.config.get('project-plus.folderBlacklist')
+    .split(',').map (pattern) -> untildify(pattern.trim())
+
+  [whitelist, blacklist]
 
 # Sort projects
 exports.sortProjects = (items) ->
@@ -61,46 +49,43 @@ exports.sortProjects = (items) ->
 
 # Filter all projects
 filterProjects = (rows) ->
-  return new Promise (resolve, reject) ->
+  rows = _.filter rows, (row) ->
+    # Is `.project` non-null
+    row.project? and
+    # Is `.project.paths` non-empty
+    (row.project.paths || []).length > 0 and
+    # Does `.project.paths` contain an array (only) of strings
+    # NOTE: This one is weird -- how could the state get so corrupted?
+    _.all(row.project.paths.map((pn) -> (pn || "").length > 0)) and
+    # NOTE: This hides the current project -- not sure if best idea
+    not _.isEqual(row.project.paths, atom.project.getPaths())
+
+  rows = rows.map (row) ->
+    # NOTE: Currently the name of the project
+    #       is just set to the first path's basename
+    name: path.basename(row.project.paths[0])
+    paths: row.project.paths
+    timestamp: row.updatedAt
+
+  # Resolve whitelist and blacklist
+  [whitelist, blacklist] = expandConfig()
+
+  # Filter according to whitelist
+  if whitelist.length > 0
     rows = _.filter rows, (row) ->
-      # Is `.project` non-null
-      row.project? and
-      # Is `.project.paths` non-empty
-      (row.project.paths || []).length > 0 and
-      # Does `.project.paths` contain an array (only) of strings
-      # NOTE: This one is weird -- how could the state get so corrupted?
-      _.all(row.project.paths.map((pn) -> (pn || "").length > 0)) and
-      # NOTE: This hides the current project -- not sure if best idea
-      not _.isEqual(row.project.paths, atom.project.getPaths())
+      glob = "{#{whitelist.join(',')},#{whitelist.join('/**,')}/**,}"
+      row.paths.filter(
+        minimatch.filter(glob,  {matchBase: true, dot: true})
+      ).length > 0
 
-    rows = rows.map (row) ->
-      # NOTE: Currently the name of the project
-      #       is just set to the first path's basename
-      name: path.basename(row.project.paths[0])
-      paths: row.project.paths
-      timestamp: row.updatedAt
+  if blacklist.length > 0
+    rows = _.filter rows, (row) ->
+      glob = "{#{blacklist.join(',')},}"
+      row.paths.filter(
+        minimatch.filter(glob,  {matchBase: true, dot: true})
+      ).length == 0
 
-    # Resolve whitelist and blacklist
-    expandConfig().then (([whitelist, blacklist]) ->
-      # Filter according to whitelist
-      if whitelist.length > 0
-        rows = _.filter rows, (row) ->
-          _.any row.paths, (pathname) ->
-            _.any whitelist, (whitelistedPath) ->
-              pathname == whitelistedPath or
-              within pathname, whitelistedPath
-
-      # Filter according to blacklist
-      if blacklist.length > 0
-        rows = _.reject rows, (row) ->
-          _.any row.paths, (pathname) ->
-            _.any blacklist, (blacklistedPath) ->
-              pathname == blacklistedPath or
-              within pathname, blacklistedPath
-
-      # Resolve
-      resolve(rows)
-    ), reject
+  rows
 
 exports.filterProjects = filterProjects
 
@@ -140,7 +125,7 @@ exports.findProjects = () ->
                 dbResolve(rows)
 
         .then (rows) ->
-          filterProjects(rows).then(resolve).catch(reject)
+          resolve(filterProjects(rows))
 
     else
       # Atom 1.5 to 1.6
@@ -170,7 +155,7 @@ exports.findProjects = () ->
 
         ), (err, rows) ->
           return reject(err) if err
-          filterProjects(rows).then(resolve).catch(reject)
+          resolve(filterProjects(rows))
 
 # shim atom.packages.serialize in <= 1.6
 packageStatesSerialize = () ->
