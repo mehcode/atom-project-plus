@@ -39,8 +39,20 @@ expandConfig = () ->
 
   [whitelist, blacklist]
 
+# Sort projects
+exports.sortProjects = (items) ->
+  items = items.sort (a, b) ->
+    a.timestamp.getTime() - b.timestamp.getTime()
+
+  items = items.reverse()
+  items
+
 # Filter all projects
-filterProjects = (rows) ->
+filterProjects = (rows, options={}) ->
+  _.defaults options, {
+    excludeCurrent: true,
+  }
+
   rows = _.filter rows, (row) ->
     # Is `.project` non-null
     row.project? and
@@ -49,8 +61,9 @@ filterProjects = (rows) ->
     # Does `.project.paths` contain an array (only) of strings
     # NOTE: This one is weird -- how could the state get so corrupted?
     _.all(row.project.paths.map((pn) -> (pn || "").length > 0)) and
-    # NOTE: This hides the current project -- not sure if best idea
-    not _.isEqual(row.project.paths, atom.project.getPaths())
+    # Exclude the current project if requested
+    not options.excludeCurrent or not _.isEqual(
+      row.project.paths, atom.project.getPaths())
 
   rows = rows.map (row) ->
     # NOTE: Currently the name of the project
@@ -82,7 +95,7 @@ filterProjects = (rows) ->
 exports.filterProjects = filterProjects
 
 # Discover all available projects
-exports.findProjects = () ->
+exports.findProjects = (options) ->
   return new Promise (resolve, reject) ->
     if atom.stateStore?
       # Atom 1.7+
@@ -117,7 +130,7 @@ exports.findProjects = () ->
                 dbResolve(rows)
 
         .then (rows) ->
-          resolve(filterProjects(rows))
+          resolve(filterProjects(rows, options))
 
     else
       # Atom 1.5 to 1.6
@@ -147,7 +160,7 @@ exports.findProjects = () ->
 
         ), (err, rows) ->
           return reject(err) if err
-          resolve(filterProjects(rows))
+          resolve(filterProjects(rows, options))
 
 # shim atom.packages.serialize in <= 1.6
 packageStatesSerialize = () ->
@@ -197,32 +210,39 @@ loadState = (key) ->
     Promise.resolve atom.getStorageFolder().load(key)
 
 exports.switchToProject = (item) ->
-  # Compute new state key from paths
-  newKey = atom.getStateKey(item.paths)
+  new Promise (resolve) ->
+    # Compute new state key from paths
+    newKey = atom.getStateKey(item.paths)
 
-  # Save the state of the current project
-  saveCurrentState().then () ->
-    # Load the state of the new project
-    loadState(newKey).then (state) ->
-      atomDeserialize(state)
+    # Save the state of the current project
+    saveCurrentState().then () ->
 
-      # TODO: These are areas where we should submit PRs to
-      #       open functionality for it
+      # HACK: Tab bar doesn't unsubscribe; memory leak
+      tabs = atom.packages.getActivePackage("tabs")
+      if tabs
+        tabBarView.unsubscribe() for tabBarView in tabs.mainModule.tabBarViews
 
-      # HACK: Tree view doesn't reload expansion states
-      tvState = state.packageStates["tree-view"]
-      if tvState
-        treeViewPack = atom.packages.getActivePackage("tree-view")
-        tv = treeViewPack?.mainModule?.treeView
-        if tv
-          tv.attach() unless tv.isVisible()
-          tv.updateRoots(tvState.directoryExpansionStates)
-          tv.selectEntry(tv.roots[0])
-          tv.selectEntryForPath(tvState.selectedPath) if tvState.selectedPath
-          tv.focus() if tvState.hasFocus
-          tv.scroller.scrollLeft(tvState.scrollLeft) if tvState.scrollLeft > 0
-          tv.scrollTop(tvState.scrollTop) if tvState.scrollTop > 0
+      # Load the state of the new project
+      loadState(newKey).then (state) ->
+        atomDeserialize(state)
 
-      # HACK: Re-focus editor (if tree-view didn't have focus)
-      unless tvState.hasFocus
-        atom.workspace.getActivePane().activate()
+        # HACK: Tree view doesn't reload expansion states
+        tvState = state.packageStates["tree-view"]
+        if tvState
+          treeViewPack = atom.packages.getActivePackage("tree-view")
+          tv = treeViewPack?.mainModule?.treeView
+          if tv
+            tv.attach() unless tv.isVisible()
+            tv.updateRoots(tvState.directoryExpansionStates)
+            tv.selectEntry(tv.roots[0])
+            tv.selectEntryForPath(tvState.selectedPath) if tvState.selectedPath
+            tv.focus() if tvState.hasFocus
+            tv.scroller.scrollLeft(tvState.scrollLeft) if tvState.scrollLeft > 0
+            tv.scrollTop(tvState.scrollTop) if tvState.scrollTop > 0
+
+        # HACK: Re-focus editor (if tree-view didn't have focus)
+        unless tvState.hasFocus
+          atom.workspace.getActivePane().activate()
+
+        # Done
+        resolve()

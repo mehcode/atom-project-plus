@@ -11,12 +11,12 @@ module.exports = ProjectPlus =
       type: 'string'
       default: ''
       title: 'Folder Blacklist'
-      description: 'Projects will never be shown for paths matching this list (including subpaths), eg `$HOME/Documents` to exclude a single folder and all its children.'
+      description: 'Projects will never be shown for paths matching this list (including subpaths), eg `~/Documents` to exclude a single folder and all its children.'
     folderWhitelist:
       type: 'string'
       default: ''
       title: 'Folder Whitelist'
-      description: 'Projects will only be shown for paths matching this list (including subpaths), eg `$HOME/Workspace` to limit to a single folder and all its children.'
+      description: 'Projects will only be shown for paths matching this list (including subpaths), eg `~/Workspace` to limit to a single folder and all its children.'
 
   activate: (state) ->
     # Events subscribed to in atom's system can be easily cleaned up
@@ -27,6 +27,16 @@ module.exports = ProjectPlus =
     @subscriptions.add atom.commands.add "atom-workspace",
       "project-plus:toggle-project-finder": =>
         @getProjectFinder().toggle()
+
+      "project-plus:open-next-recently-used-project": =>
+        @getProjectTab().next()
+
+      "project-plus:open-previous-recently-used-project": =>
+        @getProjectTab().previous()
+
+      "project-plus:move-active-project-to-top-of-stack": =>
+        # Clear the tab index
+        @projectTab = null
 
   deactivate: ->
     @modalPanel.destroy()
@@ -41,3 +51,10 @@ module.exports = ProjectPlus =
       @projectFinderView = new ProjectFinderView()
 
     @projectFinderView
+
+  getProjectTab: ->
+    unless @projectTab
+      ProjectTab = require "./project-tab"
+      @projectTab = new ProjectTab()
+
+    @projectTab

@@ -1,11 +1,20 @@
 '.platform-darwin':
   'ctrl-cmd-p': 'project-plus:toggle-project-finder'
 
-'.platform-win32':
+  'ctrl-cmd-tab': 'project-plus:open-next-recently-used-project'
+  'ctrl-cmd-tab ^ctrl': 'project-plus:move-active-project-to-top-of-stack'
+
+  'ctrl-shift-cmd-tab': 'project-plus:open-previous-recently-used-project'
+  'ctrl-shift-cmd-tab ^ctrl': 'project-plus:move-active-project-to-top-of-stack'
+
+'.platform-win32, .platform-linux':
   'ctrl-alt-p': 'project-plus:toggle-project-finder'
 
-'.platform-linux':
-  'ctrl-alt-p': 'project-plus:toggle-project-finder'
+  'ctrl-cmd-tab': 'project-plus:open-next-recently-used-project'
+  'ctrl-cmd-tab ^ctrl': 'project-plus:move-active-project-to-top-of-stack'
+
+  'ctrl-shift-cmd-tab': 'project-plus:open-previous-recently-used-project'
+  'ctrl-shift-cmd-tab ^ctrl': 'project-plus:move-active-project-to-top-of-stack'
 
 '.project-finder atom-text-editor[mini]':
   'shift-enter': 'project-finder:open-in-new-window'
