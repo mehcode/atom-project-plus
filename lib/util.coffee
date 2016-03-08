@@ -55,15 +55,22 @@ filterProjects = (rows, options={}) ->
 
   rows = _.filter rows, (row) ->
     # Is `.project` non-null
-    row.project? and
+    return false unless row.project?
+
     # Is `.project.paths` non-empty
-    (row.project.paths || []).length > 0 and
+    return false unless (row.project.paths || []).length > 0
+
     # Does `.project.paths` contain an array (only) of strings
     # NOTE: This one is weird -- how could the state get so corrupted?
-    _.all(row.project.paths.map((pn) -> (pn || "").length > 0)) and
+    return false unless _.all(row.project.paths.map(
+      (pn) -> (pn || "").length > 0))
+
     # Exclude the current project if requested
-    not options.excludeCurrent or not _.isEqual(
-      row.project.paths, atom.project.getPaths())
+    if options.excludeCurrent
+      return false if _.isEqual(row.project.paths, atom.project.getPaths())
+
+    # Pass
+    true
 
   rows = rows.map (row) ->
     # NOTE: Will be adding a way to _set_ a project name
