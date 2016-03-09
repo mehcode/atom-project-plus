@@ -1,4 +1,5 @@
 # Project Plus
+[![Build Status](https://travis-ci.org/mehcode/atom-project-plus.svg?branch=master)](https://travis-ci.org/mehcode/atom-project-plus)
 [![APM Version](https://img.shields.io/apm/v/project-plus.svg)](https://atom.io/packages/project-plus)
 [![APM Downloads](https://img.shields.io/apm/dm/project-plus.svg)](https://atom.io/packages/project-plus)
 
