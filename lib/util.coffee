@@ -185,12 +185,13 @@ packageStatesSerialize = () ->
 
 # shim atom.serialize in <= 1.6
 atomSerialize = () ->
-  return atom.serialize() if atom.serialize?
+  options = {isUnloading: true}
+  return atom.serialize(options) if atom.serialize?
 
   # Atom <= 1.6
   {
     version: atom.constructor.version
-    project: atom.project.serialize()
+    project: atom.project.serialize(options)
     workspace: atom.workspace.serialize()
     packageStates: packageStatesSerialize()
     grammars: {grammarOverridesByPath: atom.grammars.grammarOverridesByPath}
