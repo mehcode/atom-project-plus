@@ -33,9 +33,11 @@ exports.saveCurrentState = saveCurrentState
 expandConfig = () ->
   whitelist = atom.config.get('project-plus.folderWhitelist')
     .split(',').map (pattern) -> untildify(pattern.trim())
+    .filter (pattern) -> pattern.length > 0
 
   blacklist = atom.config.get('project-plus.folderBlacklist')
     .split(',').map (pattern) -> untildify(pattern.trim())
+    .filter (pattern) -> pattern.length > 0
 
   [whitelist, blacklist]
 
