@@ -222,6 +222,9 @@ loadState = (key) ->
     # Atom <= 1.6
     Promise.resolve atom.getStorageFolder().load(key)
 
+closeAllBuffers = () ->
+  buffer?.release() for buffer in atom.project.getBuffers()
+
 exports.switchToProject = (item) ->
   new Promise (resolve) ->
     # Get current state key
@@ -232,11 +235,6 @@ exports.switchToProject = (item) ->
 
     # Save the state of the current project
     saveCurrentState().then () ->
-
-      # HACK: Tab bar doesn't unsubscribe; memory leak
-      tabs = atom.packages.getActivePackage("tabs")
-      if tabs
-        tabBarView.unsubscribe() for tabBarView in tabs.mainModule.tabBarViews
 
       # Load the state of the new project
       loadState(newKey).then (state) ->
@@ -262,11 +260,11 @@ exports.switchToProject = (item) ->
               unless tvState.hasFocus
                 atom.workspace.getActivePane().activate()
         else
-          # Close all buffers
-          buffer?.destroy() for buffer in atom.project.buffers
-
           # Set project paths
           atom.project.setPaths(item.paths)
+
+          # Close all buffers
+          closeAllBuffers()
 
         # HACK[Pigments]: Pigments needs to reload on project reload
         pigments = atom.packages.getActivePackage("pigments")
@@ -279,11 +277,11 @@ exports.switchToProject = (item) ->
 exports.closeProject = () ->
   # Save the state of the current project
   saveCurrentState().then () ->
-    # Close all buffers
-    buffer?.destroy() for buffer in atom.project.getBuffers()
-
     # Set project paths
     atom.project.setPaths([])
+
+    # Close all buffers
+    closeAllBuffers()
 
     # TODO: Should we close the tree-view?
     treeViewPack = atom.packages.getActivePackage("tree-view")
