@@ -13,12 +13,6 @@ module.exports = ProjectPlus =
       title: 'Show Project Path'
       description: 'Show project folder paths under the name of each project in the project finder.'
 
-    folderBlacklist:
-      type: 'string'
-      default: ''
-      title: 'Folder Blacklist'
-      description: 'Projects will never be shown for paths matching this list (including subpaths), eg `~/Documents` to exclude a single folder and all its children.'
-
     folderWhitelist:
       type: 'string'
       default: ''
