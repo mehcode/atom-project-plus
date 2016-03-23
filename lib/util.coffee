@@ -29,17 +29,11 @@ saveCurrentState = () ->
 
 exports.saveCurrentState = saveCurrentState
 
-# Expand whitelist and blacklist
-expandConfig = () ->
-  whitelist = atom.config.get('project-plus.folderWhitelist')
+# Expand whitelist
+expandWhiteList = () ->
+  atom.config.get('project-plus.folderWhitelist')
     .split(',').map (pattern) -> untildify(pattern.trim())
     .filter (pattern) -> pattern.length > 0
-
-  blacklist = atom.config.get('project-plus.folderBlacklist')
-    .split(',').map (pattern) -> untildify(pattern.trim())
-    .filter (pattern) -> pattern.length > 0
-
-  [whitelist, blacklist]
 
 # Sort projects
 exports.sortProjects = (items) ->
@@ -85,7 +79,7 @@ filterProjects = (rows, options={}) ->
     }
 
   # Resolve whitelist and blacklist
-  [whitelist, blacklist] = expandConfig()
+  whitelist = expandWhiteList()
 
   # Filter according to whitelist
   if whitelist.length > 0
@@ -94,13 +88,6 @@ filterProjects = (rows, options={}) ->
       row.paths.filter(
         minimatch.filter(glob,  {matchBase: true, dot: true})
       ).length > 0
-
-  if blacklist.length > 0
-    rows = _.filter rows, (row) ->
-      glob = "{#{blacklist.join(',')},}"
-      row.paths.filter(
-        minimatch.filter(glob,  {matchBase: true, dot: true})
-      ).length == 0
 
   rows
 

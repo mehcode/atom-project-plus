@@ -20,7 +20,6 @@ describe "filterProjects", ->
 
   afterEach ->
     atom.config.set('project-plus.folderWhitelist', '')
-    atom.config.set('project-plus.folderBlacklist', '')
 
   it "should return no projects when none match the whitelist", ->
     atom.config.set('project-plus.folderWhitelist', 'exclude_all')
@@ -36,20 +35,6 @@ describe "filterProjects", ->
 
     atom.config.set('project-plus.folderWhitelist', '/Workspace')
     expect(util.filterProjects(rows).length).toEqual(1)
-
-  it "should not include projects that match the blacklist", ->
-    atom.config.set('project-plus.folderBlacklist', '/some/folder/here')
-    expect(util.filterProjects(rows).length).toEqual(rows.length - 1)
-
-    atom.config.set('project-plus.folderBlacklist', 'here')
-    expect(util.filterProjects(rows).length).toEqual(rows.length - 1)
-
-  it "should not include projects that match glob pattern in blacklist", ->
-    atom.config.set('project-plus.folderBlacklist', '/**/.git/**')
-    expect(util.filterProjects(rows).length).toEqual(rows.length - 1)
-
-    atom.config.set('project-plus.folderBlacklist', '/Workspace.bak/.git/**')
-    expect(util.filterProjects(rows).length).toEqual(rows.length - 1)
 
   it "should filter out projects that don't make sense", ->
     items = [
