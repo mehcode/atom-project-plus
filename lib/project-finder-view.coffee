@@ -4,6 +4,7 @@ url = require "url"
 {$, $$, SelectListView} = require "atom-space-pen-views"
 util = require "./util"
 tildify = require "tildify"
+providerManager = require "./provider-manager"
 
 module.exports =
 class ProjectPlusView extends SelectListView
@@ -72,7 +73,7 @@ class ProjectPlusView extends SelectListView
   # Find all projects using the indexeddb backed state
   populate: ->
     @setLoading("Discovering projects\u2026")
-    util.findProjects().then (items) =>
+    providerManager.all().then (items) =>
       items = util.sortProjects(items)
       @setItems items
 

@@ -29,11 +29,6 @@ saveCurrentState = () ->
 
 exports.saveCurrentState = saveCurrentState
 
-exports.saveProject = () ->
-  # Save current state
-  saveCurrentState().then ->
-    # TODO Add to "projects.cson"
-
 # Resolve project homes
 getProjectHomes = () ->
   atom.config.get('project-plus.projectHome')
@@ -55,33 +50,27 @@ filterProjects = (rows, options={}) ->
   }
 
   rows = _.filter rows, (row) ->
-    # Is `.project` non-null
-    return false unless row.project?
+    # Is `.paths` non-empty
+    return false unless (row.paths || []).length > 0
 
-    # Is `.project.paths` non-empty
-    return false unless (row.project.paths || []).length > 0
-
-    # Does `.project.paths` contain an array (only) of strings
+    # Does `.paths` contain an array (only) of strings
     # NOTE: This one is weird -- how could the state get so corrupted?
-    return false unless _.all(row.project.paths.map(
+    return false unless _.all(row.paths.map(
       (pn) -> (pn || "").length > 0))
 
     # Exclude the current project if requested
     if options.excludeCurrent
-      return false if _.isEqual(row.project.paths, atom.project.getPaths())
+      return false if _.isEqual(row.paths, atom.project.getPaths())
 
     # Pass
     true
 
+  # Name!
   rows = rows.map (row) ->
     # NOTE: Will be adding a way to _set_ a project name
-    name = (row.project.paths.map((pn) -> path.basename(pn))).join(",\u00a0")
-
-    {
-      name: name
-      paths: row.project.paths
-      timestamp: row.updatedAt
-    }
+    name = (row.paths.map((pn) -> path.basename(pn))).join(",\u00a0")
+    row.name = name
+    row
 
   # Resolve Project Home
   projectHomes = getProjectHomes()
@@ -97,74 +86,6 @@ filterProjects = (rows, options={}) ->
   rows
 
 exports.filterProjects = filterProjects
-
-# Discover all available projects
-exports.findProjects = (options) ->
-  return new Promise (resolve, reject) ->
-    if atom.stateStore?
-      # Atom 1.7+
-      # We have state serialized to IndexedDB
-      # This makes this much easier
-
-      atom.stateStore.dbPromise
-        .then (db) ->
-          return new Promise (dbResolve) ->
-            store = db.transaction(['states']).objectStore('states')
-            request = store.openCursor()
-            rows = []
-
-            request.onerror = (event) -> reject(event)
-            request.onsuccess = (event) ->
-              cursor = event.target.result
-              if cursor
-                rows.push cursor.value
-                cursor.continue()
-
-              else
-                rows = rows.map (row) ->
-                  result = if typeof row.value == "string" and row.isJSON
-                    JSON.parse(row.value)
-
-                  else
-                    row.value
-
-                  result.updatedAt = new Date(Date.parse(row.storedAt))
-                  result
-
-                dbResolve(rows)
-
-        .then (rows) ->
-          resolve(filterProjects(rows, options))
-
-    else
-      # Atom 1.5 to 1.6
-      # Editor state is in a storage folder
-      storageFolder = atom.getStorageFolder().path
-
-      # List the storage folder
-      fs.list storageFolder, (err, filenames) ->
-        # Filter to only have filenames that start with editor-
-        filenames = _.filter filenames, (fn) ->
-          basename = path.basename(fn)
-          /^editor-/.test(basename)
-
-        # Read in the JSON data from each state file
-        async.map filenames, ((filename, cb) ->
-          fs.stat filename, (err, stats) ->
-            return cb(err) if (err)
-
-            updatedAt = new Date(Date.parse(stats.mtime))
-
-            fs.readFile filename, 'utf8', (err, data) ->
-              return cb(err) if (err)
-
-              row = JSON.parse(data)
-              row.updatedAt = updatedAt
-              cb(null, row)
-
-        ), (err, rows) ->
-          return reject(err) if err
-          resolve(filterProjects(rows, options))
 
 # shim atom.packages.serialize in <= 1.6
 packageStatesSerialize = () ->
@@ -191,6 +112,8 @@ atomSerialize = () ->
     windowDimensions: atom.windowDimensions
   }
 
+exports.atomSerialize = atomSerialize
+
 # shim atom.deserialize in <= 1.6
 atomDeserialize = (state) ->
   return atom.deserialize(state) if atom.deserialize?
@@ -204,6 +127,12 @@ atomDeserialize = (state) ->
   atom.packages.packageStates = state.packageStates ? {}
   atom.project.deserialize(state.project, atom.deserializers) if state.project?
   atom.workspace.deserialize(state.workspace, atom.deserializers) if state.workspace?
+
+# shim atom.GetStorageFolder if its not there (1.7.0-beta)
+exports.atomGetStorageFolder = () ->
+  baseModulePath = path.dirname(path.dirname(require.resolve("atom")));
+  StorageFolder = require(baseModulePath + "/src/storage-folder");
+  atom.storageFolder ?= new StorageFolder(atom.getConfigDirPath())
 
 loadState = (key) ->
   if atom.stateStore?

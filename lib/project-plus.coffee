@@ -1,5 +1,6 @@
 {CompositeDisposable} = require "atom"
 util = require "./util"
+providerManager = require "./provider-manager"
 
 module.exports = ProjectPlus =
   projectPlusView: null
@@ -19,7 +20,28 @@ module.exports = ProjectPlus =
       title: 'Project Home'
       description: 'The directory where projects are assumed to be located. Projects outside of this directory will never be shown in the project finder.'
 
+    autoDiscover:
+      type: 'boolean'
+      default: true
+      title: 'Auto Discover Projects'
+      description: 'In addition to saved projects, the project finder will include all projects that have ever been opened by atom.'
+
   activate: (state) ->
+    # Register project providers
+    providerManager.addProvider("file")
+
+    # Only add session provider if autoDiscover is requested
+    if atom.config.get("project-plus.autoDiscover")
+      providerManager.addProvider("session")
+
+    # Listen for future config changes
+    atom.config.observe 'project-plus.autoDiscover', (value) ->
+      if !value
+        providerManager.removeProvider("session")
+
+      else
+        providerManager.addProvider("session")
+
     # Events subscribed to in atom's system can be easily cleaned up
     # with a CompositeDisposable
     @subscriptions = new CompositeDisposable
@@ -35,7 +57,7 @@ module.exports = ProjectPlus =
         util.closeProject()
 
       "project-plus:save": =>
-        util.saveProject()
+        providerManager.save(atom.project.getPaths())
 
       "project-plus:toggle-project-finder": =>
         @getProjectFinder().toggle()

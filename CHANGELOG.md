@@ -4,6 +4,9 @@
 * Rename `folderWhitelist` to `projectHome`
 * Default `showPath` to false
 * Add `project-plus:save` command; explicit save of the project
+* Separate out project discovery from the project switching; take what we had as project discovery and make it it an isolated component, `SessionProvider`
+* :tada: Support `projects.cson` from [project manager](https://github.com/danielbrodin/atom-project-manager) as `FileProvider`
+* Add a configuration option to turn off project detection from session storage — `project-plus.autoDiscover`
 
 ## 0.7.0
 
