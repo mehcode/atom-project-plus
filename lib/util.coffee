@@ -38,7 +38,9 @@ getProjectHomes = () ->
 # Sort projects
 exports.sortProjects = (items) ->
   items = items.sort (a, b) ->
-    a.timestamp.getTime() - b.timestamp.getTime()
+    aTime = if a.timestamp? then a.timestamp.getTime() else 0
+    bTime = if b.timestamp? then b.timestamp.getTime() else 0
+    aTime - bTime
 
   items = items.reverse()
   items
@@ -62,6 +64,10 @@ filterProjects = (rows, options={}) ->
     if options.excludeCurrent
       return false if _.isEqual(row.paths, atom.project.getPaths())
 
+    # Exclude session-provided projects if requested
+    unless atom.config.get("project-plus.autoDiscover")
+      return false if row.provider == "session"
+
     # Pass
     true
 
@@ -69,7 +75,7 @@ filterProjects = (rows, options={}) ->
   rows = rows.map (row) ->
     # NOTE: Will be adding a way to _set_ a project name
     name = (row.paths.map((pn) -> path.basename(pn))).join(",\u00a0")
-    row.name = name
+    row.title ?= name
     row
 
   # Resolve Project Home

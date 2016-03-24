@@ -28,19 +28,8 @@ module.exports = ProjectPlus =
 
   activate: (state) ->
     # Register project providers
+    providerManager.addProvider("session")
     providerManager.addProvider("file")
-
-    # Only add session provider if autoDiscover is requested
-    if atom.config.get("project-plus.autoDiscover")
-      providerManager.addProvider("session")
-
-    # Listen for future config changes
-    atom.config.observe 'project-plus.autoDiscover', (value) ->
-      if !value
-        providerManager.removeProvider("session")
-
-      else
-        providerManager.addProvider("session")
 
     # Events subscribed to in atom's system can be easily cleaned up
     # with a CompositeDisposable

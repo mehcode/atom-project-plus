@@ -45,7 +45,7 @@ class ProjectPlusView extends SelectListView
       @show()
 
   getFilterKey: ->
-    'name'
+    'title'
 
   getEmptyMessage: (itemCount) ->
     if itemCount is 0
@@ -60,7 +60,7 @@ class ProjectPlusView extends SelectListView
       if showPath
         @li class: 'two-lines', =>
           @div class: "primary-line", =>
-            @text item.name
+            @text item.title
 
           for pathname in item.paths
             @div class: "secondary-line", =>
@@ -68,7 +68,7 @@ class ProjectPlusView extends SelectListView
       else
         @li class: 'one-line', =>
           @div class: "primary-line", =>
-            @text item.name
+            @text item.title
 
   # Find all projects using the indexeddb backed state
   populate: ->
