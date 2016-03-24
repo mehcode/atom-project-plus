@@ -9,7 +9,7 @@ module.exports = ProjectPlus =
   config:
     showPath:
       type: 'boolean'
-      default: true
+      default: false
       title: 'Show Project Path'
       description: 'Show project folder paths under the name of each project in the project finder.'
 

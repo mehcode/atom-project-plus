@@ -1,3 +1,9 @@
+## 0.8.0
+
+- Remove `folderBlacklist` configuration option
+- Rename `folderWhitelist` to `projectHome`
+- Default `showPath` to false
+
 ## 0.7.0
 
 * Add `ctrl-cmd-tab` and `ctrl-shift-cmd-tab` to tab through projects (by most-recently-used)
