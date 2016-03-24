@@ -2,16 +2,16 @@ util = require '../lib/util'
 
 describe "filterProjects", ->
   rows = [
-    { project: { name: 1, paths: ['/Projects/', '/www/side'] } },
-    { project: { name: 2, paths: ['/Projects/', '/next'] } },
-    { project: { name: 3, paths: ['/tmp/Projects/'] } },
-    { project: { name: 4, paths: ['/Projects/work/next'] } },
-    { project: { name: 5, paths: ['/home/user/Projects'] } },
-    { project: { name: 6, paths: ['/Projects/hobby'] } },
-    { project: { name: 7, paths: ['/some/folder/here'] } },
-    { project: { name: 8, paths: ['/Workspace/b', '/Workspace/c'] } },
-    { project: { name: 9, paths: ['/Workspace.bak/a'] } },
-    { project: { name: 10, paths: ['/Workspace.bak/.git/secret'] } },
+    { title: 1, paths: ['/Projects/', '/www/side'] },
+    { title: 2, paths: ['/Projects/', '/next'] },
+    { title: 3, paths: ['/tmp/Projects/'] },
+    { title: 4, paths: ['/Projects/work/next'] },
+    { title: 5, paths: ['/home/user/Projects'] },
+    { title: 6, paths: ['/Projects/hobby'] },
+    { title: 7, paths: ['/some/folder/here'] },
+    { title: 8, paths: ['/Workspace/b', '/Workspace/c'] },
+    { title: 9, paths: ['/Workspace.bak/a'] },
+    { title: 10, paths: ['/Workspace.bak/.git/secret'] },
   ]
 
   beforeEach ->
@@ -38,16 +38,14 @@ describe "filterProjects", ->
 
   it "should filter out projects that don't make sense", ->
     items = [
-      # No project
-      { },
       # No paths array
-      { project: { } },
+      {},
       # No paths
-      { project: { paths: [] } },
+      {paths: []},
       # 1 path but it contains something weird
-      { project: { paths: [2] } },
+      {paths: [2]},
       # Something okay here
-      { project: { paths: ["/work"] } }
+      {paths: ["/work"]}
     ]
 
     expect(util.filterProjects(items).length).toEqual(1)
