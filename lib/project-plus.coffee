@@ -7,25 +7,6 @@ module.exports = ProjectPlus =
   modalPanel: null
   subscriptions: null
 
-  config:
-    showPath:
-      type: 'boolean'
-      default: false
-      title: 'Show Project Path'
-      description: 'Show project folder paths under the name of each project in the project finder.'
-
-    projectHome:
-      type: 'string'
-      default: ''
-      title: 'Project Home'
-      description: 'The directory where projects are assumed to be located. Projects outside of this directory will never be shown in the project finder.'
-
-    autoDiscover:
-      type: 'boolean'
-      default: true
-      title: 'Auto Discover Projects'
-      description: 'In addition to saved projects, the project finder will include all projects that have ever been opened by atom.'
-
   activate: (state) ->
     # Register project providers
     providerManager.addProvider("session")
