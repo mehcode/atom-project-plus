@@ -1,8 +1,9 @@
 ## 0.8.0
 
-- Remove `folderBlacklist` configuration option
-- Rename `folderWhitelist` to `projectHome`
-- Default `showPath` to false
+* Remove `folderBlacklist` configuration option
+* Rename `folderWhitelist` to `projectHome`
+* Default `showPath` to false
+* Add `project-plus:save` command; explicit save of the project
 
 ## 0.7.0
 

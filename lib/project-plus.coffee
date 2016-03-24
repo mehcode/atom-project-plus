@@ -34,6 +34,9 @@ module.exports = ProjectPlus =
       "project-plus:close": =>
         util.closeProject()
 
+      "project-plus:save": =>
+        util.saveProject()
+
       "project-plus:toggle-project-finder": =>
         @getProjectFinder().toggle()
 

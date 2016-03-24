@@ -29,6 +29,11 @@ saveCurrentState = () ->
 
 exports.saveCurrentState = saveCurrentState
 
+exports.saveProject = () ->
+  # Save current state
+  saveCurrentState().then ->
+    # TODO Add to "projects.cson"
+
 # Resolve project homes
 getProjectHomes = () ->
   atom.config.get('project-plus.projectHome')
