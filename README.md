@@ -51,9 +51,9 @@ Close the current project and revert to an empty atom window.
 
 ## Configuration
 
-#### Whitelist / Blacklist
+#### Project Home && Auto Discover Projects
 
-Specify a folder or glob pattern to designate which projects will be matched.
+Specify a folder or glob pattern to designate where project will be auto discovered.
 
 #### Show Project Path
 
