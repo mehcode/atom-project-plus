@@ -13,11 +13,11 @@ module.exports = ProjectPlus =
       title: 'Show Project Path'
       description: 'Show project folder paths under the name of each project in the project finder.'
 
-    folderWhitelist:
+    projectHome:
       type: 'string'
       default: ''
-      title: 'Folder Whitelist'
-      description: 'Projects will only be shown for paths matching this list (including subpaths), eg `~/Workspace` to limit to a single folder and all its children.'
+      title: 'Project Home'
+      description: 'The directory where projects are assumed to be located. Projects outside of this directory will never be shown in the project finder.'
 
   activate: (state) ->
     # Events subscribed to in atom's system can be easily cleaned up

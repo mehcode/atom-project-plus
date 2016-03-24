@@ -29,9 +29,9 @@ saveCurrentState = () ->
 
 exports.saveCurrentState = saveCurrentState
 
-# Expand whitelist
-expandWhiteList = () ->
-  atom.config.get('project-plus.folderWhitelist')
+# Resolve project homes
+getProjectHomes = () ->
+  atom.config.get('project-plus.projectHome')
     .split(',').map (pattern) -> untildify(pattern.trim())
     .filter (pattern) -> pattern.length > 0
 
@@ -78,15 +78,15 @@ filterProjects = (rows, options={}) ->
       timestamp: row.updatedAt
     }
 
-  # Resolve whitelist and blacklist
-  whitelist = expandWhiteList()
+  # Resolve Project Home
+  projectHomes = getProjectHomes()
 
-  # Filter according to whitelist
-  if whitelist.length > 0
+  # Filter according to Project Home
+  if projectHomes.length > 0
+    pattern = "{#{projectHomes.join(',')},#{projectHomes.join('/**,')}/**,}"
     rows = _.filter rows, (row) ->
-      glob = "{#{whitelist.join(',')},#{whitelist.join('/**,')}/**,}"
       row.paths.filter(
-        minimatch.filter(glob,  {matchBase: true, dot: true})
+        minimatch.filter(pattern, {matchBase: true, dot: true})
       ).length > 0
 
   rows

@@ -19,21 +19,21 @@ describe "filterProjects", ->
       atom.packages.activatePackage('project-plus')
 
   afterEach ->
-    atom.config.set('project-plus.folderWhitelist', '')
+    atom.config.set('project-plus.projectHome', '')
 
   it "should return no projects when none match the whitelist", ->
-    atom.config.set('project-plus.folderWhitelist', 'exclude_all')
+    atom.config.set('project-plus.projectHome', 'exclude_all')
     expect(util.filterProjects(rows)).toEqual([])
 
   it "should inlude only projects that match the whitelist", ->
-    atom.config.set('project-plus.folderWhitelist', '/some/folder/here')
+    atom.config.set('project-plus.projectHome', '/some/folder/here')
     expect(util.filterProjects(rows).length).toEqual(1)
 
   it "should include projects that are within a whitelisted folder", ->
-    atom.config.set('project-plus.folderWhitelist', '/Projects')
+    atom.config.set('project-plus.projectHome', '/Projects')
     expect(util.filterProjects(rows).length).toEqual(4)
 
-    atom.config.set('project-plus.folderWhitelist', '/Workspace')
+    atom.config.set('project-plus.projectHome', '/Workspace')
     expect(util.filterProjects(rows).length).toEqual(1)
 
   it "should filter out projects that don't make sense", ->
