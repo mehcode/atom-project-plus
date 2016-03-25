@@ -7,10 +7,6 @@ Simply awesome project management in Atom.
 
 ![](https://raw.githubusercontent.com/mehcode/atom-project-plus/master/project-plus.gif)
 
-You may be thinking.. Yet another project manager (for atom)? Atom contains a
-lot of piping to make project management awesome. It's missing those few bits
-that expose that awesome to users. This is that package.
-
  - **No configuration** — atom was already keeping track of your projects
 
  - **No mess** (project files) — atom already knows about your projects and their needs (and is planning to know more)
@@ -49,15 +45,25 @@ folders using an OS folder picker.
 
 Close the current project and revert to an empty atom window.
 
+#### Project Plus: Save
+
+Saves the current project and marks it to be shown in the project finder (
+if not using auto-discover).
+
 ## Configuration
 
-#### Project Home && Auto Discover Projects
+#### Auto Discover
 
-Specify a folder or glob pattern to designate where project will be auto discovered.
+Disable to limit the project finder to explicitly saved projects (
+managed through `projects.cson` in the Atom configuration directory).
+
+#### Project Home
+
+Specify a folder or glob pattern to limit projects that are discovered.
 
 #### Show Project Path
 
-Disable to hide the project paths on the project finder.
+Disable to hide the project paths.
 
 ## Contributing
 
