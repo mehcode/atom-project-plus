@@ -199,7 +199,18 @@ exports.switchToProject = (item) ->
           pigments.mainModule.reloadProjectVariables()
 
         # Done
+        projectChangeNotification(item)
         resolve()
+
+projectChangeNotification = (item)->
+  return unless atom.config.get('project-plus.notifications')
+
+  name = "<strong style='text-transform: capitalize;'>
+            #{item.title || path.basename(item.paths[0])}
+          </strong>"
+
+  atom.notifications.addInfo "Project have been changed to #{name}",
+    detail: ("Path: #{item.paths[0]}" if atom.config.get('project-plus.showPath'))
 
 exports.closeProject = () ->
   # Save the state of the current project
