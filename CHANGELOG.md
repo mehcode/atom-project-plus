@@ -7,6 +7,7 @@
 * Separate out project discovery from the project switching; take what we had as project discovery and make it it an isolated component, `SessionProvider`
 * :tada: Support `projects.cson` from [project manager](https://github.com/danielbrodin/atom-project-manager) as `FileProvider`
 * Add a configuration option to turn off project detection from session storage — `project-plus.autoDiscover`
+* Add notifications on command success (for project switch and save) — [@shemerey](https://github.com/shemerey)
 
 ## 0.7.0
 
