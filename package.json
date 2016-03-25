@@ -19,7 +19,7 @@
       "type": "boolean",
       "default": false,
       "title": "Show Project Path",
-      "description": "Show project folder paths under the name of each project in the project finder."
+      "description": "Show project folder paths under the name of each project."
     },
     "projectHome": {
       "type": "string",
@@ -36,8 +36,8 @@
     "notifications": {
       "type": "boolean",
       "default": true,
-      "title": "Enable project swith notification",
-      "description": "Will notify you whenever you open, switch your project"
+      "title": "Notifications",
+      "description": "Show notifications on command completion."
     }
   },
   "dependencies": {

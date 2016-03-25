@@ -4,6 +4,7 @@ path = require 'path'
 minimatch = require 'minimatch'
 untildify = require 'untildify'
 async = require 'async'
+notificationManager = require './notification-manager'
 {saveState} = require './provider/session'
 
 saveCurrentState = () ->
@@ -17,6 +18,14 @@ getProjectHomes = () ->
   atom.config.get('project-plus.projectHome')
     .split(',').map (pattern) -> untildify(pattern.trim())
     .filter (pattern) -> pattern.length > 0
+
+# Get project title
+getProjectTitle = (item) ->
+  # NOTE: Will be adding a way to _set_ a project name
+  name = (item.paths.map((pn) -> path.basename(pn))).join(",\u00a0")
+  name
+
+exports.getProjectTitle = getProjectTitle
 
 # Sort projects
 exports.sortProjects = (items) ->
@@ -56,9 +65,7 @@ filterProjects = (rows, options={}) ->
 
   # Name!
   rows = rows.map (row) ->
-    # NOTE: Will be adding a way to _set_ a project name
-    name = (row.paths.map((pn) -> path.basename(pn))).join(",\u00a0")
-    row.title ?= name
+    row.title ?= getProjectTitle(row)
     row
 
   # Resolve Project Home
@@ -189,15 +196,14 @@ exports.switchToProject = (item) ->
         projectChangeNotification(item)
         resolve()
 
-projectChangeNotification = (item)->
-  return unless atom.config.get('project-plus.notifications')
+projectChangeNotification = (item) ->
+  name = "<strong>#{item.title}</strong>"
 
-  name = "<strong style='text-transform: capitalize;'>
-            #{item.title || path.basename(item.paths[0])}
-          </strong>"
+  detail = null
+  if atom.config.get('project-plus.showPath')
+    detail = item.paths.join("<br/>")
 
-  atom.notifications.addInfo "Project have been changed to #{name}",
-    detail: ("Path: #{item.paths[0]}" if atom.config.get('project-plus.showPath'))
+  notificationManager.success("Activated project #{name}", {detail: detail})
 
 exports.closeProject = () ->
   # Save the state of the current project
