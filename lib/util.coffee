@@ -1,31 +1,14 @@
-# These are utils that should be in atom.
 _ = require 'underscore-plus'
 fs = require 'fs-plus'
 path = require 'path'
 minimatch = require 'minimatch'
 untildify = require 'untildify'
 async = require 'async'
+{saveState} = require './provider/session'
 
 saveCurrentState = () ->
-  currentKey = atom.getStateKey(atom.project.getPaths())
-  # Return if we can't get a key
-  return Promise.resolve(null) unless currentKey
-
-  # Serialize current state
-  currentState = atomSerialize()
-
-  if atom.stateStore?
-    # Atom 1.7+
-    atom.stateStore.save(currentKey, currentState)
-
-  else
-    # Atom 1.5 to 1.6
-    store = atom.getStorageFolder()
-    keypath = store.pathForKey(currentKey)
-    new Promise (resolve, reject) ->
-      fs.writeFile keypath, JSON.stringify(currentState), 'utf8', (err) ->
-        return reject(err) if err
-        resolve()
+  currentPaths = atom.project.getPaths()
+  return saveState(currentPaths)
 
 exports.saveCurrentState = saveCurrentState
 
@@ -136,9 +119,13 @@ atomDeserialize = (state) ->
 
 # shim atom.GetStorageFolder if its not there (1.7.0-beta)
 exports.atomGetStorageFolder = () ->
-  baseModulePath = path.dirname(path.dirname(require.resolve("atom")));
-  StorageFolder = require(baseModulePath + "/src/storage-folder");
-  atom.storageFolder ?= new StorageFolder(atom.getConfigDirPath())
+  if atom.getStorageFolder?
+    atom.getStorageFolder()
+
+  else
+    baseModulePath = path.dirname(path.dirname(require.resolve("atom")));
+    StorageFolder = require(baseModulePath + "/src/storage-folder");
+    atom.storageFolder ?= new StorageFolder(atom.getConfigDirPath())
 
 loadState = (key) ->
   if atom.stateStore?
