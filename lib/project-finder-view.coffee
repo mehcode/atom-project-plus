@@ -4,7 +4,10 @@ url = require "url"
 {$, $$, SelectListView} = require "atom-space-pen-views"
 util = require "./util"
 tildify = require "tildify"
+fuzzaldrinPlus = require "fuzzaldrin-plus"
 providerManager = require "./provider-manager"
+
+fuzzyFilter = null;
 
 module.exports =
 class ProjectPlusView extends SelectListView
@@ -76,6 +79,31 @@ class ProjectPlusView extends SelectListView
     providerManager.all().then (items) =>
       items = util.sortProjects(items)
       @setItems items
+
+  # Copy code from SelectListView so we can change to fuzzaldrin-plus
+  populateList: ->
+    return unless @items?
+
+    filterQuery = @getFilterQuery()
+    if filterQuery.length
+      fuzzyFilter ?= require('fuzzaldrin-plus').filter
+      filteredItems = fuzzyFilter(@items, filterQuery, key: @getFilterKey())
+    else
+      filteredItems = @items
+
+    @list.empty()
+    if filteredItems.length
+      @setError(null)
+
+      for i in [0...Math.min(filteredItems.length, @maxItems)]
+        item = filteredItems[i]
+        itemView = $(@viewForItem(item))
+        itemView.data('select-list-item', item)
+        @list.append(itemView)
+
+      @selectItemView(@list.find('li:first'))
+    else
+      @setError(@getEmptyMessage(@items.length, filteredItems.length))
 
   confirmed: (item) ->
     @hide()
