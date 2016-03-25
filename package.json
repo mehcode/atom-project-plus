@@ -32,6 +32,12 @@
       "default": true,
       "title": "Auto Discover Projects",
       "description": "In addition to saved projects, the project finder will include all projects that have ever been opened by atom."
+    },
+    "notifications": {
+      "type": "boolean",
+      "default": true,
+      "title": "Enable project swith notification",
+      "description": "Will notify you whenever you open, switch your project"
     }
   },
   "dependencies": {
