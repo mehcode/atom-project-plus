@@ -6,10 +6,11 @@ untildify = require 'untildify'
 async = require 'async'
 notificationManager = require './notification-manager'
 {saveState} = require './provider/session'
+atomProjectUtil = require 'atom-project-util'
 
 saveCurrentState = () ->
   currentPaths = atom.project.getPaths()
-  return saveState(currentPaths)
+  return atomProjectUtil.save(currentPaths)
 
 exports.saveCurrentState = saveCurrentState
 
@@ -83,48 +84,8 @@ filterProjects = (rows, options={}) ->
 
 exports.filterProjects = filterProjects
 
-# shim atom.packages.serialize in <= 1.6
-packageStatesSerialize = () ->
-  return atom.packages.serialize() if atom.packages.serialize?
-
-  for pack in atom.packages.getActivePackages()
-    atom.packages.setPackageState(pack.name, state) if state = pack.serialize?()
-
-  atom.packages.packageStates
-
-# shim atom.serialize in <= 1.6
-atomSerialize = () ->
-  options = {isUnloading: true}
-  return atom.serialize(options) if atom.serialize?
-
-  # Atom <= 1.6
-  {
-    version: atom.constructor.version
-    project: atom.project.serialize(options)
-    workspace: atom.workspace.serialize()
-    packageStates: packageStatesSerialize()
-    grammars: {grammarOverridesByPath: atom.grammars.grammarOverridesByPath}
-    fullScreen: atom.isFullScreen()
-    windowDimensions: atom.windowDimensions
-  }
-
-exports.atomSerialize = atomSerialize
-
-# shim atom.GetStorageFolder if its not there (1.7.0-beta)
-exports.atomGetStorageFolder = () ->
-  if atom.getStorageFolder?
-    atom.getStorageFolder()
-
-  else
-    baseModulePath = path.dirname(path.dirname(require.resolve("atom")))
-    StorageFolder = require(baseModulePath + "/src/storage-folder")
-    atom.storageFolder ?= new StorageFolder(atom.getConfigDirPath())
-
-closeAllBuffers = () ->
-  buffer?.release() for buffer in atom.project.getBuffers()
-
 exports.switchToProject = (item) ->
-  require("atom-project-switch")(item.paths)
+  atomProjectUtil.switch(item.paths)
     .then ->
       projectChangeNotification(item)
 
@@ -141,16 +102,4 @@ projectChangeNotification = (item) ->
   notificationManager.success("Activated project #{name}", {detail: detail})
 
 exports.closeProject = () ->
-  # Save the state of the current project
-  saveCurrentState().then () ->
-    # Set project paths
-    atom.project.setPaths([])
-
-    # Close all buffers
-    closeAllBuffers()
-
-    # TODO: Should we close the tree-view?
-    treeViewPack = atom.packages.getActivePackage("tree-view")
-    tv = treeViewPack?.mainModule?.treeView
-    if tv
-      tv.detach() if tv.isVisible()
+  atomProjectUtil.close()
