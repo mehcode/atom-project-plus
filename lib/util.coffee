@@ -110,91 +110,26 @@ atomSerialize = () ->
 
 exports.atomSerialize = atomSerialize
 
-# shim atom.deserialize in <= 1.6
-atomDeserialize = (state) ->
-  return atom.deserialize(state) if atom.deserialize?
-
-  # Atom <= 1.6
-  if grammarOverridesByPath = state.grammars?.grammarOverridesByPath
-    atom.grammars.grammarOverridesByPath = grammarOverridesByPath
-
-  atom.setFullScreen(state.fullScreen)
-
-  atom.packages.packageStates = state.packageStates ? {}
-  atom.project.deserialize(state.project, atom.deserializers) if state.project?
-  atom.workspace.deserialize(state.workspace, atom.deserializers) if state.workspace?
-
 # shim atom.GetStorageFolder if its not there (1.7.0-beta)
 exports.atomGetStorageFolder = () ->
   if atom.getStorageFolder?
     atom.getStorageFolder()
 
   else
-    baseModulePath = path.dirname(path.dirname(require.resolve("atom")));
-    StorageFolder = require(baseModulePath + "/src/storage-folder");
+    baseModulePath = path.dirname(path.dirname(require.resolve("atom")))
+    StorageFolder = require(baseModulePath + "/src/storage-folder")
     atom.storageFolder ?= new StorageFolder(atom.getConfigDirPath())
-
-loadState = (key) ->
-  if atom.stateStore?
-    # Atom 1.7+
-    atom.stateStore.load(key)
-
-  else
-    # Atom <= 1.6
-    Promise.resolve atom.getStorageFolder().load(key)
 
 closeAllBuffers = () ->
   buffer?.release() for buffer in atom.project.getBuffers()
 
 exports.switchToProject = (item) ->
-  new Promise (resolve) ->
-    # Get current state key
-    currentKey = atom.getStateKey(atom.project.getPaths())
+  require("atom-project-switch")(item.paths)
+    .then ->
+      projectChangeNotification(item)
 
-    # Compute new state key from paths
-    newKey = atom.getStateKey(item.paths)
-
-    # Save the state of the current project
-    saveCurrentState().then () ->
-
-      # Load the state of the new project
-      loadState(newKey).then (state) ->
-        if state
-          atomDeserialize(state)
-
-          # HACK: Tree view doesn't reload expansion states
-          tvState = state.packageStates["tree-view"]
-          if tvState
-            treeViewPack = atom.packages.getActivePackage("tree-view")
-            tv = treeViewPack?.mainModule?.treeView
-            if tv
-              # NOTE: Re-attach the tree-view if this is an empty atom
-              tv.attach() if not currentKey and not tv.isVisible()
-              tv.updateRoots(tvState.directoryExpansionStates)
-              tv.selectEntry(tv.roots[0])
-              tv.selectEntryForPath(tvState.selectedPath) if tvState.selectedPath
-              tv.focus() if tvState.hasFocus
-              tv.scroller.scrollLeft(tvState.scrollLeft) if tvState.scrollLeft > 0
-              tv.scrollTop(tvState.scrollTop) if tvState.scrollTop > 0
-
-              # HACK: Re-focus editor (if tree-view didn't have focus)
-              unless tvState.hasFocus
-                atom.workspace.getActivePane().activate()
-        else
-          # Set project paths
-          atom.project.setPaths(item.paths)
-
-          # Close all buffers
-          closeAllBuffers()
-
-        # HACK[Pigments]: Pigments needs to reload on project reload
-        pigments = atom.packages.getActivePackage("pigments")
-        if pigments
-          pigments.mainModule.reloadProjectVariables()
-
-        # Done
-        projectChangeNotification(item)
-        resolve()
+    .catch (err) ->
+      throw err
 
 projectChangeNotification = (item) ->
   name = "<strong>#{item.title}</strong>"

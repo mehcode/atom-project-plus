@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "async": "^1.5.2",
+    "atom-project-switch": "^1.0.0",
     "atom-space-pen-views": "^2.2.0",
     "fs-plus": "^2.8.1",
     "minimatch": "^3.0.0",
