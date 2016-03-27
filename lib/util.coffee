@@ -5,7 +5,6 @@ minimatch = require 'minimatch'
 untildify = require 'untildify'
 async = require 'async'
 notificationManager = require './notification-manager'
-{saveState} = require './provider/session'
 atomProjectUtil = require 'atom-project-util'
 
 saveCurrentState = () ->
