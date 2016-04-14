@@ -21,6 +21,8 @@ getProjectHomes = () ->
 
 # Get project title
 getProjectTitle = (item) ->
+  return item.title if (item.title or "").length > 0
+
   # NOTE: Will be adding a way to _set_ a project name
   name = (item.paths.map((pn) -> path.basename(pn))).join(",\u00a0")
   name
@@ -92,7 +94,7 @@ exports.switchToProject = (item) ->
       throw err
 
 projectChangeNotification = (item) ->
-  name = "<strong>#{item.title}</strong>"
+  name = "<strong>#{getProjectTitle(item)}</strong>"
 
   detail = null
   if atom.config.get('project-plus.showPath')
