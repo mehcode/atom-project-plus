@@ -59,7 +59,7 @@ managed through `projects.cson` in the Atom configuration directory).
 
 #### Project Home
 
-Specify a folder or glob pattern to limit projects that are discovered.
+Specify a folder or glob pattern to limit projects that are discovered. This is a case-sensitive field, make sure you've got the path name specified correctly.
 
 #### Show Project Path
 
