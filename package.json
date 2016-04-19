@@ -25,7 +25,7 @@
       "type": "string",
       "default": " ",
       "title": "Project Home",
-      "description": "The directory where projects are assumed to be located. Projects outside of this directory will never be shown in the project finder."
+      "description": "The directory where projects are assumed to be located. Projects outside of this directory will never be shown in the project finder. NOTE: This is a case-sensitive field."
     },
     "autoDiscover": {
       "type": "boolean",
