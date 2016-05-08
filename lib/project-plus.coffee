@@ -21,7 +21,10 @@ module.exports = ProjectPlus =
       "project-plus:open": =>
         atom.pickFolder (selectedPaths = []) =>
           if selectedPaths
-            util.switchToProject({paths: selectedPaths})
+            if atom.config.get('project-plus.newWindow')
+              atom.open(pathsToOpen: selectedPaths, newWindow: true)
+            else
+              util.switchToProject({paths: selectedPaths})
 
       "project-plus:close": =>
         util.closeProject()

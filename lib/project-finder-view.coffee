@@ -16,8 +16,10 @@ class ProjectPlusView extends SelectListView
     @addClass("project-finder")
 
     atom.commands.add @element,
-      'project-finder:open-in-new-window': =>
-        @confirmAndOpenInNewWindow()
+      'project-finder:alt-open': =>
+        if atom.config.get('project-plus.newWindow')
+          @open(null, false)
+        else @open(null, true)
 
   destroy: ->
     @cancel()
@@ -77,17 +79,15 @@ class ProjectPlusView extends SelectListView
       items = util.sortProjects(items)
       @setItems items
 
-  confirmed: (item) ->
+  confirmed: (item) -> @open(item)
+
+  open: (item, newWindow) ->
+    item ?= @getSelectedItem()
+    newWindow ?= atom.config.get('project-plus.newWindow')
     @hide()
 
-    # Switch to project in the same window
-    util.switchToProject item
-
-  confirmAndOpenInNewWindow: () ->
-    item = @getSelectedItem()
-    @hide()
-
-    # Open project in new window
-    # TODO: `newWindow: false` means reuse existing window if possible (
-    #         might want a config option here)
-    atom.open(pathsToOpen: item.paths, newWindow: false)
+    if newWindow # Open project in new window
+      atom.open(pathsToOpen: item.paths, newWindow: true)
+    else
+      # Switch to project in the same window
+      util.switchToProject item
