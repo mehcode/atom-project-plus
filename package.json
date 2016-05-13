@@ -27,6 +27,12 @@
       "title": "Project Home",
       "description": "The directory where projects are assumed to be located. Projects outside of this directory will never be shown in the project finder. NOTE: This is a case-sensitive field."
     },
+    "newWindow": {
+      "type": "boolean",
+      "default": false,
+      "title": "Open in New Window",
+      "description": "Open projects in a new window by default. `shift-enter` will trigger the opposite behavior."
+    },
     "autoDiscover": {
       "type": "boolean",
       "default": true,

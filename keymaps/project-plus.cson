@@ -17,4 +17,4 @@
   'ctrl-shift-cmd-tab ^ctrl': 'project-plus:move-active-project-to-top-of-stack'
 
 '.project-finder atom-text-editor[mini]':
-  'shift-enter': 'project-finder:open-in-new-window'
+  'shift-enter': 'project-finder:alt-open' #alt-enter?

@@ -26,8 +26,8 @@ apm install project-plus
 #### Project Finder
 
  - `ctrl-alt-p` (linux/windows) or `ctrl-cmd-p` (mac) to open the project finder
- - `enter` will open the project in the current window
- - `shift-enter` will open the project in a new window
+ - `enter` will open the project in the current window by default[*](#open-in-new-window)
+ - `shift-enter` will open the project in a new window by default[*](#open-in-new-window)
 
 #### Project Tab
 
@@ -38,7 +38,7 @@ apm install project-plus
 
 #### Project Plus: Open
 
-Switch to a project (in the current atom window) by selecting one or more
+Switch to a project (in the current atom window by default[*](#open-in-new-window)) by selecting one or more
 folders using an OS folder picker.
 
 #### Project Plus: Close
@@ -64,6 +64,10 @@ Specify a folder or glob pattern to limit projects that are discovered. This is 
 #### Show Project Path
 
 Disable to hide the project paths.
+
+#### Open in New Window
+
+Open projects in a new window by default. `shift-enter` will always do the inverse.
 
 ## Contributing
 
