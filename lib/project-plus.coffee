@@ -33,7 +33,8 @@ module.exports = ProjectPlus =
         providerManager.save(atom.project.getPaths())
 
       "project-plus:toggle-project-finder": =>
-        @getProjectFinder().toggle()
+        # Remove project from available providers
+        @getProjectFinder().setMode("open").toggle()
 
       "project-plus:open-next-recently-used-project": =>
         @getProjectTab().next()
@@ -44,6 +45,14 @@ module.exports = ProjectPlus =
       "project-plus:move-active-project-to-top-of-stack": =>
         # Clear the tab index
         @projectTab = null
+
+      "project-plus:edit-projects": =>
+        # Open the projects.cson
+        atom.workspace.open(require("./provider/file").getFile())
+
+      "project-plus:remove": =>
+        # Remove project from available providers
+        @getProjectFinder().setMode("remove").toggle()
 
   deactivate: ->
     @modalPanel.destroy()

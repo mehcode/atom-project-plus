@@ -24,6 +24,10 @@ class ProjectPlusView extends SelectListView
           @open(null, false)
         else @open(null, true)
 
+  setMode: (mode) ->
+    @mode = mode
+    @
+
   destroy: ->
     @cancel()
     @panel?.destroy()
@@ -107,7 +111,12 @@ class ProjectPlusView extends SelectListView
     else
       @setError(@getEmptyMessage(@items.length, filteredItems.length))
 
-  confirmed: (item) -> @open(item)
+  confirmed: (item) ->
+    if @mode == "open"
+      @open(item)
+
+    else
+      @remove(item)
 
   open: (item, newWindow) ->
     item ?= @getSelectedItem()
@@ -119,3 +128,9 @@ class ProjectPlusView extends SelectListView
     else
       # Switch to project in the same window
       util.switchToProject item
+
+  remove: (item) ->
+    @hide()
+
+    # Remove projects from providers
+    providerManager.remove(item.paths)

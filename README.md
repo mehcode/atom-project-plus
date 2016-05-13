@@ -50,6 +50,15 @@ Close the current project and revert to an empty atom window.
 Saves the current project and marks it to be shown in the project finder (
 if not using auto-discover).
 
+#### Project Plus: Remove
+
+Remove a project from the session storage and from the `projects.cson`.
+
+#### Project Plus: Edit Projects
+
+Opens the `projects.cson` file. This file can be populated either manually or
+via saving projects with `project-plus:save`.
+
 ## Configuration
 
 #### Auto Discover
