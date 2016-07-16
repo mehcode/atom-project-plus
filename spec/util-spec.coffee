@@ -36,6 +36,13 @@ describe "filterProjects", ->
     atom.config.set('project-plus.projectHome', '/Workspace')
     expect(util.filterProjects(rows).length).toEqual(1)
 
+  it "should always include projects that have been saved", ->
+    items = rows.slice(0)
+    items.push({ title: 11, paths: ['outside_of_home'], provider: 'file' })
+
+    atom.config.set('project-plus.projectHome', '/Projects')
+    expect(util.filterProjects(items).length).toEqual(5)
+
   it "should filter out projects that don't make sense", ->
     items = [
       # No paths array

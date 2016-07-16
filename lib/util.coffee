@@ -77,6 +77,10 @@ filterProjects = (rows, options={}) ->
   if projectHomes.length > 0
     pattern = "{#{projectHomes.join(',')},#{projectHomes.join('/**,')}/**,}"
     rows = _.filter rows, (row) ->
+      # Always include projects that have been explicitly saved, even if their
+      # paths aren't in Project Home
+      return true if row.provider == "file"
+
       row.paths.filter(
         minimatch.filter(pattern, {matchBase: true, dot: true})
       ).length > 0
