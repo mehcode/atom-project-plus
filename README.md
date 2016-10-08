@@ -76,6 +76,24 @@ Any saved projects that aren't in your project home will still be displayed.
 
 Disable to hide the project paths.
 
+#### Show Icon
+
+Enable to show an icon next to each project. You can customize the icon for each
+project in `projects.cson` (in the Atom configuration directory) with any icon from the
+[Atom Styleguide](http://flight-manual.atom.io/hacking-atom/sections/iconography/).
+
+#### Show Git Branch
+
+Show each project's current checked-out git branch next to its name in the Project
+Finder. If you have more than one path in a project, Project Plus will show the
+first path's branch.
+
+#### Show Git Modified Status
+
+Show each project's current git modified status next to its name in the Project
+Finder. If you have more than one path in a project, Project Plus will show the
+first path's status.
+
 #### Open in New Window
 
 Open projects in a new window by default. `shift-enter` will always do the inverse.

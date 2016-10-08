@@ -63,3 +63,14 @@ describe('filterProjects', () => {
     expect(util.filterProjects(items).length).toEqual(1)
   })
 })
+
+describe('getIcon', () => {
+  it('should return an icon class', () => {
+    expect(util.getIcon('repo')).toEqual('icon-repo')
+  })
+
+  it('should return null if no icon type is given', () => {
+    expect(util.getIcon()).toEqual(null)
+  })
+})
+
