@@ -1,6 +1,11 @@
 'use babel'
 
+import sinon from 'sinon'
+import fuzzaldrin from 'fuzzaldrin-plus'
 import * as util from '../lib/util'
+
+// Stub fuzzaldrin score.
+fuzzaldrin.score = sinon.stub()
 
 describe('filterProjects', () => {
   let rows = [
@@ -61,5 +66,39 @@ describe('filterProjects', () => {
     ]
 
     expect(util.filterProjects(items).length).toEqual(1)
+  })
+})
+
+describe('fuzzyFilterItems', () => {
+  let items = [
+    {title: 'side', paths: ['/www/side', '/Projects/side']},
+    {title: 'next', paths: ['/www/next', '/Projects/next']}
+  ]
+
+  it('should weight title matches 4 times more than paths', () => {
+    fuzzaldrin.score.returns(1)
+    const filtered = util.fuzzyFilterItems(items, '')
+    expect(filtered[0].score).toEqual(5)
+  })
+
+  it('should filter out items whose score is 0', () => {
+    fuzzaldrin.score.withArgs('side', '').returns(0)
+    fuzzaldrin.score.withArgs('/www/side:/Projects/side', '').returns(0)
+    fuzzaldrin.score.withArgs('next', '').returns(1)
+    fuzzaldrin.score.withArgs('/www/next:/Projects/next', '').returns(1)
+
+    const filtered = util.fuzzyFilterItems(items, '')
+    expect(filtered.length).toEqual(1)
+  })
+
+  it('should sort items by their score', () => {
+    fuzzaldrin.score.withArgs('side', '').returns(5)
+    fuzzaldrin.score.withArgs('/www/side:/Projects/side', '').returns(5)
+    fuzzaldrin.score.withArgs('next', '').returns(10)
+    fuzzaldrin.score.withArgs('/www/next:/Projects/next', '').returns(10)
+
+    const filtered = util.fuzzyFilterItems(items, '')
+    expect(filtered[0]).toEqual(items[1])
+    expect(filtered[1]).toEqual(items[0])
   })
 })
