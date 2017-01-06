@@ -2,7 +2,7 @@
   {
     'label': 'Packages'
     'submenu': [
-      'label': 'Bracket Matcher'
+      'label': 'Project Plus'
       'submenu': [
         { 'label': 'Open Project', 'command': 'project-plus:open' }
         { 'label': 'Close Project', 'command': 'project-plus:close' }
