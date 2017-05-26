@@ -25,14 +25,14 @@ apm install project-plus
 
 #### Project Finder
 
- - `ctrl-alt-p` (linux/windows) or `ctrl-cmd-p` (mac) to open the project finder
+ - `alt-shift-p` (linux/windows) or `ctrl-cmd-p` (mac) to open the project finder
  - `enter` will open the project in the current window by default[*](#open-in-new-window)
  - `shift-enter` will open the project in a new window by default[*](#open-in-new-window)
 
 #### Project Tab
 
- - `ctrl-cmd-tab` will switch to the next recently used project
- - `ctrl-shift-cmd-tab` will switch to the previous recently used project
+ - `alt-shift-tab` (linux/windows) or `ctrl-cmd-tab` (mac) will switch to the next recently used project
+ - `ctrl-alt-shift-tab` (linux/windows) or `shift-ctrl-cmd-tab` (mac) will switch to the previous recently used project
 
 ## Commands
 
