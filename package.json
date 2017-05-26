@@ -44,6 +44,12 @@
       "default": true,
       "title": "Notifications",
       "description": "Show notifications on command completion."
+    },
+    "blacklist": {
+      "type": "string",
+      "default": "\\.git",
+      "title": "Blacklist",
+      "description": "A regular expression to match project paths that should be excluded from the project manager."
     }
   },
   "dependencies": {
