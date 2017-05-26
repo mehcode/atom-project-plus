@@ -1,0 +1,16 @@
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      'label': 'Project Plus'
+      'submenu': [
+        { 'label': 'Open Project Finder', 'command': 'project-plus:toggle-project-finder'}
+        { 'label': 'Open Project', 'command': 'project-plus:open' }
+        { 'label': 'Close Project', 'command': 'project-plus:close' }
+        { 'label': 'Save Project', 'command': 'project-plus:save' }
+        { 'label': 'Remove Project', 'command': 'project-plus:remove' }
+        { 'label': 'Edit Projects', 'command': 'project-plus:edit-projects' }
+      ]
+    ]
+  }
+]
